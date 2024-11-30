@@ -16,7 +16,7 @@ export class Table extends Construct {
       globalSecondaryIndexes: props?.globalSecondaryIndexes,
       encryption: dynamodb.TableEncryptionV2.awsManagedKey(),
       billing: dynamodb.Billing.onDemand(),
-      removalPolicy: cdk.RemovalPolicy.DESTROY
+      removalPolicy: cdk.RemovalPolicy.RETAIN
     });
   }
 }
