@@ -37,10 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          npm install -g aws-cdk
-          curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
+          npm install -g aws-cdk          
           aws --version
           cdk --version
 
