@@ -49,7 +49,7 @@ jobs:
       
       - name: Bootstrap AWS environment (if needed)
         run: |
-          cdk bootstrap --no-ecr-repository
+          cdk bootstrap
 
       - name: Deploy
         run: |
