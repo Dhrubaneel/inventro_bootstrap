@@ -13,7 +13,7 @@ variables:
   AWS_REGION: 'ap-south-1'
 
 jobs:
-- job: Deploy Infrastructure
+- job: DeployInfrastructure
   displayName: 'Deploy AWS CDK Stack'
   steps:
   - task: NodeTool@0
