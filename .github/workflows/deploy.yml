@@ -5,8 +5,7 @@ name: Deploy Inventro Bootstrap Stack
 
 on:
   push:
-      branches:
-        - master
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
