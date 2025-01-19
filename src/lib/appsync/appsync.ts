@@ -29,6 +29,13 @@ export class AppSyncApi extends Construct {
             description: "DynamoDB Table Data Source",
             serviceRole: cdk.aws_iam.Role.fromRoleArn(this, "ImportedRole", props.role)
         });
+
+        this.dataSource.createResolver("GetAllConfigResolver", {
+            typeName: "Query",
+            fieldName: "getAllConfig",
+            requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(),
+            responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem(),
+        });
     }
 }
 
