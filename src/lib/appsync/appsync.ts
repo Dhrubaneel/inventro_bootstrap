@@ -25,10 +25,11 @@ export class AppSyncApi extends Construct {
         });
 
         this.role = new iam.Role(this, "AppSyncRole", {
+            roleName: `${props?.name}_role`,
             assumedBy: new iam.ServicePrincipal("appsync.amazonaws.com"),
             managedPolicies: [
                 iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSAppSyncPushToCloudWatchLogs"),
-                iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonDynamoDBFullAccess")
+                iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess")
             ]
         });
 
