@@ -33,8 +33,8 @@ export class AppSyncApi extends Construct {
         this.dataSource.createResolver("GetAllConfigResolver", {
             typeName: "Query",
             fieldName: "getAllConfig",
-            requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(),
-            responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem(),
+            requestMappingTemplate: appsync.MappingTemplate.fromFile(`${props.requestVTLPath}`),
+            responseMappingTemplate: appsync.MappingTemplate.fromFile(`${props.responseVTLPath}`),
         });
     }
 }
@@ -44,4 +44,6 @@ export interface AppSyncApiProps {
     schemaPath: string;
     tableArn: string;
     role: string;
+    requestVTLPath: string;
+    responseVTLPath: string;
 }

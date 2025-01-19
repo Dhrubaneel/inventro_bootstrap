@@ -147,7 +147,9 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       name: INVENTROCONFIG,
       schemaPath: 'schemas/inventro_config_schema.graphql',
       tableArn: config_table.table.tableArn,
-      role: inventro_role.role.roleArn
+      role: inventro_role.role.roleArn,
+      requestVTLPath: 'vtl_templates/getAllConfig.req.vtl',
+      responseVTLPath: 'vtl_templates/getAllConfig.res.vtl'
     });
 
 
