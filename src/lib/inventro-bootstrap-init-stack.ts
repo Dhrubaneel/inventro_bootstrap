@@ -1,13 +1,24 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { Table } from './dynamodb/tables';
 import { AppSyncApi } from './appsync/appsync';
-import { INVENTROCONFIG, INVENTROINVENTRY, INVENTROSHOPPINGLIST, INVENTROTRANSACTION } from './constants';
+import { INVENTROCONFIG, INVENTROINVENTRY, INVENTROROLE, INVENTROSHOPPINGLIST, INVENTROTRANSACTION } from './constants';
+import { IamRole } from './iam/iam';
 
 export class InventroBootstrapInitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    const inventro_role = new IamRole(this, 'InventroRole', {
+      roleName: INVENTROROLE,
+      servicePrincipals: ['appsync.amazonaws.com'],
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSAppSyncPushToCloudWatchLogs"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess")
+      ]
+    });
 
     const config_table = new Table(this, 'InventroConfig', {
       tableName: INVENTROCONFIG,
@@ -134,13 +145,15 @@ export class InventroBootstrapInitStack extends cdk.Stack {
 
     const config_table_api = new AppSyncApi(this, 'InventroConfigApi', {
       name: INVENTROCONFIG,
-      schemaPath: 'schemas/inventro_config_schema.graphql'
+      schemaPath: 'schemas/inventro_config_schema.graphql',
+      tableArn: config_table.table.tableArn,
+      role: inventro_role.role.roleArn
     });
 
 
     //assign resource tags
     addTagsToResources(
-      [config_table, inventry_table, transaction_table, shopping_list_table, config_table_api],
+      [inventro_role, config_table, inventry_table, transaction_table, shopping_list_table, config_table_api],
       { 'Project': 'Inventro' }
     );
   }

@@ -1,13 +1,11 @@
 import * as cdk from 'aws-cdk-lib';
 import * as appsync from 'aws-cdk-lib/aws-appsync';
-import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 export class AppSyncApi extends Construct {
 
     public readonly api: appsync.GraphqlApi;
-    public readonly dataSource: appsync.CfnDataSource;
-    public readonly role: iam.Role;
+    public readonly dataSource: appsync.DynamoDbDataSource;
     constructor(scope: Construct, id: string, props: AppSyncApiProps) {
         super(scope, id);
 
@@ -24,24 +22,12 @@ export class AppSyncApi extends Construct {
             }
         });
 
-        this.role = new iam.Role(this, "AppSyncRole", {
-            roleName: `${props?.name}_role`,
-            assumedBy: new iam.ServicePrincipal("appsync.amazonaws.com"),
-            managedPolicies: [
-                iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSAppSyncPushToCloudWatchLogs"),
-                iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess")
-            ]
-        });
-
-        this.dataSource = new appsync.CfnDataSource(this, "GraphQLApiDataSource", {
-            apiId: this.api.apiId,
-            name: `${props?.name}_data_source`,
-            type: "AMAZON_DYNAMODB",
-            serviceRoleArn: this.role.roleArn,
-            dynamoDbConfig: {
-                tableName: `${props?.name}`,
-                awsRegion: cdk.Stack.of(this).region
-            }
+        this.dataSource = new appsync.DynamoDbDataSource(this, "GraphQLApiDataSource", {
+            api: this.api,
+            table: cdk.aws_dynamodb.Table.fromTableArn(this, "ImportedTable", props.tableArn),
+            name: `${props?.name}_datasource`,
+            description: "DynamoDB Table Data Source",
+            serviceRole: cdk.aws_iam.Role.fromRoleArn(this, "ImportedRole", props.role)
         });
     }
 }
@@ -49,4 +35,6 @@ export class AppSyncApi extends Construct {
 export interface AppSyncApiProps {
     name: string;
     schemaPath: string;
+    tableArn: string;
+    role: string;
 }
