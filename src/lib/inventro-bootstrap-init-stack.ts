@@ -1,21 +1,22 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import { Table } from './dynamodb/tables'
-import { AppSyncApi } from './appsync/appsync'
+import { Table } from './dynamodb/tables';
+import { AppSyncApi } from './appsync/appsync';
+import { INVENTROCONFIG, INVENTROINVENTRY, INVENTROSHOPPINGLIST, INVENTROTRANSACTION } from './constants';
 
 export class InventroBootstrapInitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const config_table = new Table(this, 'InventroConfig', {
-      tableName: 'inventro_config',
+      tableName: INVENTROCONFIG,
       partitionKey: 'pk',
       sortKey: 'sk'
     });
 
     const inventry_table = new Table(this, 'InventroInventry', {
-      tableName: 'inventro_inventry',
+      tableName: INVENTROINVENTRY,
       partitionKey: 'itemId',
       globalSecondaryIndexes: [
         {
@@ -77,7 +78,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
     });
 
     const transaction_table = new Table(this, 'InventroTransaction', {
-      tableName: 'inventro_transaction',
+      tableName: INVENTROTRANSACTION,
       partitionKey: 'transactionId',
       globalSecondaryIndexes: [
         {
@@ -102,7 +103,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
     });
 
     const shopping_list_table = new Table(this, 'InventroShoppingList', {
-      tableName: 'inventro_shopping_list',
+      tableName: INVENTROSHOPPINGLIST,
       partitionKey: 'itemType',
       sortKey: 'dataType',
       globalSecondaryIndexes: [
@@ -132,7 +133,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
     });
 
     const config_table_api = new AppSyncApi(this, 'InventroConfigApi', {
-      name: 'inventro_config_api',
+      name: INVENTROCONFIG,
       schemaPath: 'schemas/inventro_config_schema.graphql'
     });
 
