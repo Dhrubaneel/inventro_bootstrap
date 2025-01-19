@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Table } from './dynamodb/tables'
+import { AppSyncApi } from './appsync/appsync'
 
 export class InventroBootstrapInitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -130,10 +131,15 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       ]
     });
 
+    const config_table_api = new AppSyncApi(this, 'InventroConfigApi', {
+      name: 'inventro_config_api',
+      schemaPath: 'schemas/inventro_config_schema.graphql'
+    });
+
 
     //assign resource tags
     addTagsToResources(
-      [config_table, inventry_table, transaction_table, shopping_list_table],
+      [config_table, inventry_table, transaction_table, shopping_list_table, config_table_api],
       { 'Project': 'Inventro' }
     );
   }
