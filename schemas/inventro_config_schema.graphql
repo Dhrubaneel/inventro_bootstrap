@@ -1,0 +1,19 @@
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    getAllConfig(nextToken: String): InventroConfigList
+}
+
+type InventroConfig {
+	pk: String!
+	sk: String!
+	description: String
+}
+
+type InventroConfigList {
+	items: [InventroConfig]
+	nextToken: String
+}
