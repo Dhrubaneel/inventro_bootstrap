@@ -8,13 +8,21 @@ type Query {
 }
 
 type Mutation {
-
+	addConfig(input: InputInventroConfig!): InventroConfig
 }
 
 type InventroConfig {
 	pk: String!
 	sk: String!
 	description: String
+	updatedAt: String
+}
+
+type InputInventroConfig {
+	pk: String!
+	sk: String!
+	description: String
+	updatedAt: String
 }
 
 type InventroConfigList {

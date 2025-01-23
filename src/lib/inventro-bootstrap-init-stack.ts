@@ -149,7 +149,8 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       tableArn: config_table.table.tableArn,
       role: inventro_role.role.roleArn,
       requestVTLPath: 'vtl_templates/getAllConfig.req.vtl',
-      responseVTLPath: 'vtl_templates/getAllConfig.res.vtl'
+      responseVTLPath: 'vtl_templates/getAllConfig.res.vtl',
+      requestVTLPath1: 'vtl_templates/addConfig.req.vtl'
     });
 
 

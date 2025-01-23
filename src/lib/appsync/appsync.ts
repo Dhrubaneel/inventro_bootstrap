@@ -36,6 +36,13 @@ export class AppSyncApi extends Construct {
             requestMappingTemplate: appsync.MappingTemplate.fromFile(`${props.requestVTLPath}`),
             responseMappingTemplate: appsync.MappingTemplate.fromFile(`${props.responseVTLPath}`),
         });
+
+        this.dataSource.createResolver("AddConfigResolver", {
+            typeName: "Mutation",
+            fieldName: "addConfig",
+            requestMappingTemplate: appsync.MappingTemplate.fromFile(`${props.requestVTLPath1}`),
+            responseMappingTemplate: appsync.MappingTemplate.fromFile(`${props.responseVTLPath}`),
+        });
     }
 }
 
@@ -46,4 +53,5 @@ export interface AppSyncApiProps {
     role: string;
     requestVTLPath: string;
     responseVTLPath: string;
+    requestVTLPath1: string;
 }
