@@ -30,12 +30,12 @@ export class AppSyncApi extends Construct {
             serviceRole: cdk.aws_iam.Role.fromRoleArn(this, "ImportedRole", props.role)
         });
 
-        this.dataSource.createResolver("GetAllConfigResolver", {
-            typeName: "Query",
-            fieldName: "getAllConfig",
-            requestMappingTemplate: appsync.MappingTemplate.fromFile(`${props.requestVTLPath}`),
-            responseMappingTemplate: appsync.MappingTemplate.fromFile(`${props.responseVTLPath}`),
-        });
+        // this.dataSource.createResolver("GetAllConfigResolver", {
+        //     typeName: "Query",
+        //     fieldName: "getAllConfig",
+        //     requestMappingTemplate: appsync.MappingTemplate.fromFile(`${props.requestVTLPath}`),
+        //     responseMappingTemplate: appsync.MappingTemplate.fromFile(`${props.responseVTLPath}`),
+        // });
 
         // this.dataSource.createResolver("AddConfigResolver", {
         //     typeName: "Mutation",

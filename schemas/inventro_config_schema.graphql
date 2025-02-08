@@ -1,9 +1,9 @@
-type InventroConfig 
-  @model 
+type InventroConfig
+  @model
   @versioned
   @auth(rules: [{ allow: owner }, { allow: private }])
-  @key(fields: ["pk", "sk"]) {
-  pk: String! @primaryKey
-  sk: String! @primaryKey(sortKeyFields: ["sk"])
+  {
+  pk: String! @primaryKey(sortKeyFields: ["sk"])
+  sk: String!
   description: String
 }
