@@ -37,12 +37,12 @@ export class AppSyncApi extends Construct {
             responseMappingTemplate: appsync.MappingTemplate.fromFile(`${props.responseVTLPath}`),
         });
 
-        this.dataSource.createResolver("AddConfigResolver", {
-            typeName: "Mutation",
-            fieldName: "addConfig",
-            requestMappingTemplate: appsync.MappingTemplate.fromFile(`${props.requestVTLPath1}`),
-            responseMappingTemplate: appsync.MappingTemplate.fromFile(`${props.responseVTLPath}`),
-        });
+        // this.dataSource.createResolver("AddConfigResolver", {
+        //     typeName: "Mutation",
+        //     fieldName: "addConfig",
+        //     requestMappingTemplate: appsync.MappingTemplate.fromFile(`${props.requestVTLPath1}`),
+        //     responseMappingTemplate: appsync.MappingTemplate.fromFile(`${props.responseVTLPath}`),
+        // });
     }
 }
 

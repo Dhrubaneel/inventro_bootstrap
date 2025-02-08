@@ -1,31 +1,9 @@
-schema {
-    query: Query
-    mutation: Mutation
-}
-
-type Query {
-    getAllConfig(nextToken: String): InventroConfigList
-}
-
-type Mutation {
-	addConfig(input: InputInventroConfig!): InventroConfig
-}
-
-type InventroConfig {
-	pk: String!
-	sk: String!
-	description: String
-	updatedAt: String
-}
-
-type InputInventroConfig {
-	pk: String!
-	sk: String!
-	description: String
-	updatedAt: String
-}
-
-type InventroConfigList {
-	items: [InventroConfig]
-	nextToken: String
+type InventroConfig 
+  @model 
+  @versioned
+  @auth(rules: [{ allow: owner }, { allow: private }])
+  @key(fields: ["pk", "sk"]) {
+  pk: String! @primaryKey
+  sk: String! @primaryKey(sortKeyFields: ["sk"])
+  description: String
 }
