@@ -143,20 +143,20 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       ]
     });
 
-    // const config_table_api = new AppSyncApi(this, 'InventroConfigApi', {
-    //   name: INVENTROCONFIG,
-    //   schemaPath: 'schemas/inventro_config_schema.graphql',
-    //   tableArn: config_table.table.tableArn,
-    //   role: inventro_role.role.roleArn,
-    //   requestVTLPath: 'vtl_templates/getAllConfig.req.vtl',
-    //   responseVTLPath: 'vtl_templates/getAllConfig.res.vtl',
-    //   requestVTLPath1: 'vtl_templates/addConfig.req.vtl'
-    // });
+    const config_table_api = new AppSyncApi(this, 'InventroConfigApi', {
+      name: INVENTROCONFIG,
+      schemaPath: 'schemas/inventro_config_schema.graphql',
+      tableArn: config_table.table.tableArn,
+      role: inventro_role.role.roleArn,
+      requestVTLPath: 'vtl_templates/getAllConfig.req.vtl',
+      responseVTLPath: 'vtl_templates/getAllConfig.res.vtl',
+      requestVTLPath1: 'vtl_templates/addConfig.req.vtl'
+    });
 
 
     //assign resource tags
     addTagsToResources(
-      [inventro_role, config_table, inventry_table, transaction_table, shopping_list_table],
+      [inventro_role, config_table, inventry_table, transaction_table, shopping_list_table, config_table_api],
       { 'Project': 'Inventro' }
     );
   }
