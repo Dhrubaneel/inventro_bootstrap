@@ -3,7 +3,6 @@ import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Table } from './dynamodb/tables';
-import { AppSyncApi } from './appsync/appsync';
 import { INVENTROCONFIG, INVENTROINVENTRY, INVENTROROLE, INVENTROSHOPPINGLIST, INVENTROTRANSACTION } from './constants';
 import { IamRole } from './iam/iam';
 
@@ -13,9 +12,8 @@ export class InventroBootstrapInitStack extends cdk.Stack {
 
     const inventro_role = new IamRole(this, 'InventroRole', {
       roleName: INVENTROROLE,
-      servicePrincipals: ['appsync.amazonaws.com'],
+      servicePrincipals: ['amplify.amazonaws.com'],
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSAppSyncPushToCloudWatchLogs"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess")
       ]
     });
@@ -143,20 +141,9 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       ]
     });
 
-    const config_table_api = new AppSyncApi(this, 'InventroConfigApi', {
-      name: INVENTROCONFIG,
-      schemaPath: 'schemas/inventro_config_schema.graphql',
-      tableArn: config_table.table.tableArn,
-      role: inventro_role.role.roleArn,
-      requestVTLPath: 'vtl_templates/getAllConfig.req.vtl',
-      responseVTLPath: 'vtl_templates/getAllConfig.res.vtl',
-      requestVTLPath1: 'vtl_templates/addConfig.req.vtl'
-    });
-
-
     //assign resource tags
     addTagsToResources(
-      [inventro_role, config_table, inventry_table, transaction_table, shopping_list_table, config_table_api],
+      [inventro_role, config_table, inventry_table, transaction_table, shopping_list_table],
       { 'Project': 'Inventro' }
     );
   }

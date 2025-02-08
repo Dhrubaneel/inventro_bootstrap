@@ -1,9 +1,0 @@
-type InventroConfig
-  @model
-  @versioned
-  @auth(rules: [{ allow: owner }, { allow: private }])
-  @key(fields: ["pk", "sk"]) {
-  pk: String!
-  sk: String!
-  description: String
-}
