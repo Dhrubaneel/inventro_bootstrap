@@ -4,19 +4,10 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Table } from './dynamodb/tables';
 import { INVENTROCONFIG, INVENTROINVENTRY, INVENTROROLE, INVENTROSHOPPINGLIST, INVENTROTRANSACTION } from './constants';
-import { IamRole } from './iam/iam';
 
 export class InventroBootstrapInitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
-    const inventro_role = new IamRole(this, 'InventroRole', {
-      roleName: INVENTROROLE,
-      servicePrincipals: ['amplify.amazonaws.com'],
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess")
-      ]
-    });
 
     const config_table = new Table(this, 'InventroConfig', {
       tableName: INVENTROCONFIG,
@@ -143,7 +134,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
 
     //assign resource tags
     addTagsToResources(
-      [inventro_role, config_table, inventry_table, transaction_table, shopping_list_table],
+      [config_table, inventry_table, transaction_table, shopping_list_table],
       { 'Project': 'Inventro' }
     );
   }
