@@ -1,9 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as iam from 'aws-cdk-lib/aws-iam';
 import { Table } from './dynamodb/tables';
-import { INVENTROCONFIG, INVENTROINVENTRY, INVENTROROLE, INVENTROSHOPPINGLIST, INVENTROTRANSACTION } from './constants';
+import { INVENTROCONFIG, INVENTROINVENTRY, PERSISTENTMODELVERSION, INVENTROSHOPPINGLIST, INVENTROTRANSACTION } from './constants';
 
 export class InventroBootstrapInitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -132,9 +131,14 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       ]
     });
 
+    const persistant_model_version_table = new Table(this, 'InventroPersistantModelVersion', {
+      tableName: PERSISTENTMODELVERSION,
+      partitionKey: 'id'
+    });
+
     //assign resource tags
     addTagsToResources(
-      [config_table, inventry_table, transaction_table, shopping_list_table],
+      [config_table, inventry_table, transaction_table, shopping_list_table, persistant_model_version_table],
       { 'Project': 'Inventro' }
     );
   }
