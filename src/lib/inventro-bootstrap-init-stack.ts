@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Table } from './dynamodb/tables';
-import { INVENTROCONFIG, INVENTROINVENTRY, PERSISTENTMODELVERSION, INVENTROSHOPPINGLIST, INVENTROTRANSACTION } from './constants';
+import { INVENTROCONFIG, INVENTROINVENTRY, INVENTROSHOPPINGLIST, INVENTROTRANSACTION } from './constants';
 
 export class InventroBootstrapInitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
