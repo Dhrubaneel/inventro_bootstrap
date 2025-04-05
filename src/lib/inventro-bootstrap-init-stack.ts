@@ -66,7 +66,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
           indexName: 'items_by_location',
           partitionKey: {
             name: 'location',
-            type: dynamodb.AttributeType.NUMBER
+            type: dynamodb.AttributeType.STRING
           },
           sortKey: {
             name: 'itemId',
