@@ -131,14 +131,9 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       ]
     });
 
-    const persistant_model_version_table = new Table(this, 'InventroPersistantModelVersion', {
-      tableName: PERSISTENTMODELVERSION,
-      partitionKey: 'id'
-    });
-
     //assign resource tags
     addTagsToResources(
-      [config_table, inventry_table, transaction_table, shopping_list_table, persistant_model_version_table],
+      [config_table, inventry_table, transaction_table, shopping_list_table],
       { 'Project': 'Inventro' }
     );
   }
