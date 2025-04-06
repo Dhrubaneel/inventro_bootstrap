@@ -1,0 +1,7 @@
+{
+    "action": "syncInventry",
+    "data": {
+        "lastSync": "2025-04-01T06:18:19.492Z",
+        "nextToken": "eyJh"
+    }
+}

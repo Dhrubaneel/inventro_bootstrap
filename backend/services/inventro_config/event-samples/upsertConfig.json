@@ -1,0 +1,16 @@
+{
+    "action": "upsertConfig",
+    "data": [
+        {
+            "pk": "TYPE",
+            "sk": "Diaper",
+            "updatedAt": "2025-04-06T18:37:05.071Z"
+        },
+        {
+            "pk": "CATEGORY",
+            "sk": "Miscellaneous",
+            "description": "Stationery, Batteries, Storage Bags & Wraps",
+            "updatedAt": "2025-04-06T18:37:05.071Z"
+        }
+    ]
+}
