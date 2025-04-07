@@ -1,0 +1,19 @@
+{
+    "action": "upsertInventry",
+    "data": [
+        {
+            "itemId": "8909106022089",
+            "brand": "Unilever",
+            "category": "Cleaning Supplies",
+            "expiresOn": 1775260800,
+            "itemName": "Comfort",
+            "location": "Utility Balcony Storage",
+            "price": 435,
+            "quantity": 2,
+            "supplier": "Flipkart",
+            "type": "Fabric Softeners",
+            "unit": "Liter(s)",
+            "updatedAt": "2025-04-06T05:34:16.882Z"
+        }
+    ]
+}

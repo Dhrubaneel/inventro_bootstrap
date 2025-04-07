@@ -26,20 +26,26 @@ export async function upsertCloudConfig(items) {
     return await updateItems(process.env.CONFIG_TABLE, items, (item, tableName) => ({
         TableName: tableName,
         Key: {
-            pk: item.pk,
-            sk: item.sk
+            pk: item.pk, // Partition key
+            sk: item.sk  // Sort key
         },
-        UpdateExpression: "SET #updatedAt = :updatedAt, #description = :description",
+        UpdateExpression: `SET ${Object.keys(item)
+            .filter(key => key !== "pk" && key !== "sk") // Exclude primary key attributes
+            .map(key => `#${key} = :${key}`)
+            .join(", ")}`,
         ConditionExpression: "attribute_not_exists(updatedAt) OR updatedAt < :currentUpdatedAt",
-        ExpressionAttributeNames: {
-            "#updatedAt": "updatedAt",
-            "#description": "description"
-        },
-        ExpressionAttributeValues: {
-            ":updatedAt": item.updatedAt,
-            ":currentUpdatedAt": item.updatedAt,
-            ":description": item.description || ""
-        },
+        ExpressionAttributeNames: Object.keys(item)
+            .filter(key => key !== "pk" && key !== "sk") // Exclude primary key attributes
+            .reduce((acc, key) => {
+                acc[`#${key}`] = key;
+                return acc;
+            }, {}),
+        ExpressionAttributeValues: Object.keys(item)
+            .filter(key => key !== "pk" && key !== "sk") // Exclude primary key attributes
+            .reduce((acc, key) => {
+                acc[`:${key}`] = item[key];
+                return acc;
+            }, { ":currentUpdatedAt": item.updatedAt }),
         ReturnValues: "NONE"
     }));
 }
