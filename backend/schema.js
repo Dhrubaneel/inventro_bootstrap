@@ -30,18 +30,22 @@ export const updateInventrySchema = {
         type: "object",
         properties: {
             itemId: { type: "string" },
-            brand: { type: "string" },
-            category: { type: "string" },
-            expiresOn: { type: "number" },
+            transactionId: { type: "string" },
+            timestamp: { type: "string" },
+            transactionType: { type: "string", enum: ["add", "remove"] },
             itemName: { type: "string" },
-            location: { type: "string" },
-            price: { type: "number" },
-            quantity: { type: "number" },
-            supplier: { type: "string" },
             type: { type: "string" },
+            category: { type: "string" },
+            brand: { type: "string" },
+            quantityChanged: { type: "number" },
             unit: { type: "string" },
-            updatedAt: { type: "string" }
+            price: { type: "number" },
+            mrp: { type: "number" },
+            pricePerUnit: { type: "number" },
+            mrpPerUnit: { type: "number" },
+            supplier: { type: "string" },
+            location: { type: "string" }
         },
-        required: ["itemId", "brand", "category", "expiresOn", "itemName", "location", "price", "quantity", "supplier", "type", "unit", "updatedAt"]
+        required: ["itemId", "transactionId", "timestamp", "transactionType", "itemName", "type", "category", "brand", "quantityChanged", "unit", "location"]
     }
 }

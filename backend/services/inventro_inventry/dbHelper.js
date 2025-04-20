@@ -8,29 +8,29 @@ const envPath = path.resolve(__dirname, '../../.env');
 config({ path: envPath });
 
 
-export async function upsertCloudInventory(items) {
+export async function updateCloudInventory(items) {
     return await updateItems(process.env.INVENTRY_TABLE, items, (item, tableName) => ({
         TableName: tableName,
         Key: {
-            itemId: item.itemId // Use itemId as the partition key
+            itemId: item.itemId, // Partition key
+            transactionId: item.transactionId // Sort key
         },
         UpdateExpression: `SET ${Object.keys(item)
-            .filter(key => key !== "itemId") // Exclude the partition key from the update
+            .filter(key => key !== "itemId" && key !== "transactionId") // Exclude primary key attributes
             .map(key => `#${key} = :${key}`)
             .join(", ")}`,
-        ConditionExpression: "attribute_not_exists(updatedAt) OR updatedAt < :currentUpdatedAt",
         ExpressionAttributeNames: Object.keys(item)
-            .filter(key => key !== "itemId") // Exclude the partition key from attribute names
+            .filter(key => key !== "itemId" && key !== "transactionId") // Exclude primary key attributes
             .reduce((acc, key) => {
                 acc[`#${key}`] = key;
                 return acc;
             }, {}),
         ExpressionAttributeValues: Object.keys(item)
-            .filter(key => key !== "itemId") // Exclude the partition key from attribute values
+            .filter(key => key !== "itemId" && key !== "transactionId") // Exclude primary key attributes
             .reduce((acc, key) => {
                 acc[`:${key}`] = item[key];
                 return acc;
-            }, { ":currentUpdatedAt": item.updatedAt }),
+            }, {}),
         ReturnValues: "NONE"
     }));
 }
