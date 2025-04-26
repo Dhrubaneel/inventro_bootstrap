@@ -1,10 +1,12 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { Table } from './dynamodb/tables';
 import { ApiGateway } from './apiGateway/api';
 import { LambdaFunction } from './lambda/lambda';
-import { INVENTRO_CONFIG, INVENTRO_INVENTRY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT } from './constants';
+import { INVENTRO_CONFIG, INVENTRO_INVENTRY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE } from './constants';
+import { IamRole } from './iam/iam';
 
 export class InventroBootstrapInitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -116,19 +118,36 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       cors: true
     });
 
+    const inventro_service_role = new IamRole(this, 'InventroServiceRole', {
+      roleName: INVENTRO_SERVICE_ROLE,
+      roleDescription: 'Role for Inventro service to access DynamoDB and other resources',
+      servicePrincipals: ['lambda.amazonaws.com'],
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess")
+      ]
+    });
+
     const inventro_service = new LambdaFunction(this, 'InventroService', {
       functionName: INVENTRO_SERVICE,
       handler: 'lambda.handler',
       codePath: './artefact',
       timeout: cdk.Duration.seconds(INVENTRO_SERVICE_TIMEOUT),
       description: 'Inventro lambda function to manage all the operations',
+      role: inventro_service_role.role,
     });
 
-      //assign resource tags
-      addTagsToResources(
-        [config_table, inventry_table, shopping_list_table, inventro_api, inventro_service],
-        { 'Project': 'Inventro' }
-      );
+    //assign resource tags
+    addTagsToResources(
+      [
+        config_table,
+        inventry_table,
+        shopping_list_table,
+        inventro_api,
+        inventro_service,
+        inventro_service_role
+      ],
+      { 'Project': 'Inventro' }
+    );
   }
 }
 

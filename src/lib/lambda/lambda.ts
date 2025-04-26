@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 export class LambdaFunction extends Construct {
@@ -18,6 +19,7 @@ export class LambdaFunction extends Construct {
       memorySize: props.memorySize ?? 128,
       timeout: props.timeout ?? cdk.Duration.seconds(10),
       description: props.description,
+      role: props.role,
     });
   }
 }
@@ -31,4 +33,5 @@ export interface LambdaFunctionProps {
   memorySize?: number;
   timeout?: cdk.Duration;
   description?: string;
+  role?: iam.IRole;
 }
