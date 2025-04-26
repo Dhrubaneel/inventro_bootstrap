@@ -47,10 +47,11 @@ jobs:
           aws configure set region ${{ env.AWS_REGION }}
 
       - name: Create backend artefact
-        run: |          
+        run: |     
+          mkdir -p artefact     
           cd ./backend
           ls
-          npm i --production
+          npm i --omit=dev
           ls
           zip -r ../artefact/lambda.zip .
           cd ..
