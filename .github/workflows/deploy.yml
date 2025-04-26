@@ -45,6 +45,18 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region ${{ env.AWS_REGION }}
+
+      - name: Create backend artefact
+        run: |          
+          cd ./backend
+          ls
+          npm i --production
+          ls
+          zip -r ../artefact/lambda.zip .
+          cd ..
+          ls
+          cd ./artefact
+          ls
       
       - name: Bootstrap AWS environment (if needed)
         run: |
