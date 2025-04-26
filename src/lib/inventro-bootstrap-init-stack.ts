@@ -3,7 +3,8 @@ import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Table } from './dynamodb/tables';
 import { ApiGateway } from './apiGateway/api';
-import { INVENTRO_CONFIG, INVENTRO_INVENTRY, INVENTRO_SHOPPING_LIST, INVENTRO_API } from './constants';
+import { LambdaFunction } from './lambda/lambda';
+import { INVENTRO_CONFIG, INVENTRO_INVENTRY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT } from './constants';
 
 export class InventroBootstrapInitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -115,11 +116,19 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       cors: true
     });
 
-    //assign resource tags
-    addTagsToResources(
-      [config_table, inventry_table, shopping_list_table, inventro_api],
-      { 'Project': 'Inventro' }
-    );
+    const inventro_service = new LambdaFunction(this, 'InventroService', {
+      functionName: INVENTRO_SERVICE,
+      handler: 'lambda.handler',
+      codePath: './artefact',
+      timeout: cdk.Duration.seconds(INVENTRO_SERVICE_TIMEOUT),
+      description: 'Inventro lambda function to manage all the operations',
+    });
+
+      //assign resource tags
+      addTagsToResources(
+        [config_table, inventry_table, shopping_list_table, inventro_api, inventro_service],
+        { 'Project': 'Inventro' }
+      );
   }
 }
 

@@ -50,14 +50,9 @@ jobs:
         run: |     
           mkdir -p artefact     
           cd ./backend
-          ls
           npm i --omit=dev
-          ls
-          zip -r ../artefact/lambda.zip .
+          cp -r . ../artefact/
           cd ..
-          ls
-          cd ./artefact
-          ls
       
       - name: Bootstrap AWS environment (if needed)
         run: |
