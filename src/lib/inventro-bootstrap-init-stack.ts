@@ -115,7 +115,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       apiName: INVENTRO_API,
       description: 'API for Inventro application',
       stageName: 'prod',
-      cors: true
+      cors: false
     });
 
     const inventro_service_role = new IamRole(this, 'InventroServiceRole', {
