@@ -208,21 +208,21 @@ function getDefaultIntegrationResponses(): apigateway.IntegrationResponse[] {
   return [
     {
       statusCode: "200",
-      selectionPattern: "2\\d{2}", // Matches 200 range
+      selectionPattern: ".*",
       responseTemplates: {
         "application/json": "$input.body"
       }
     },
     {
       statusCode: "400",
-      selectionPattern: "4\\d{2}", // Matches 400 errors
+      selectionPattern: ".*\\[400\\].*",
       responseTemplates: {
         "application/json": `{"message": "Client error"}`
       }
     },
     {
       statusCode: "500",
-      selectionPattern: "5\\d{2}", // Matches 500 errors
+      selectionPattern: ".*",
       responseTemplates: {
         "application/json": `{"message": "Server error"}`
       }
