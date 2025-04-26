@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Table } from './dynamodb/tables';
 import { ApiGateway } from './apiGateway/api';
@@ -124,7 +125,8 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       roleDescription: 'Role for Inventro service to access DynamoDB and other resources',
       servicePrincipals: ['lambda.amazonaws.com'],
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess")
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess"),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
       ]
     });
 
@@ -150,7 +152,23 @@ export class InventroBootstrapInitStack extends cdk.Stack {
           "action": "syncConfig",
           "data": $input.json('$')
         }`
-      }
+      },
+      integrationResponses: [
+        {
+          statusCode: "200",
+          responseTemplates: {
+            "application/json": "$input.body"
+          }
+        }
+      ],
+      methodResponses: [
+        {
+          statusCode: "200",
+          responseModels: {
+            "application/json": apigateway.Model.EMPTY_MODEL
+          }
+        }
+      ]
     });
 
     const inventro_config_api_resource_upsert_method = new ApiResource(this, 'InventroConfigApiResourceUpsertMethod', {
@@ -164,7 +182,23 @@ export class InventroBootstrapInitStack extends cdk.Stack {
           "action": "upsertConfig",
           "data": $input.json('$')
         }`
-      }
+      },
+      integrationResponses: [
+        {
+          statusCode: "200",
+          responseTemplates: {
+            "application/json": "$input.body"
+          }
+        }
+      ],
+      methodResponses: [
+        {
+          statusCode: "200",
+          responseModels: {
+            "application/json": apigateway.Model.EMPTY_MODEL
+          }
+        }
+      ]
     });
 
     const inventro_inventry_api_resource = inventro_api.restApi.root.addResource(INVENTRO_INVENTRY_ENDPOINT);
@@ -180,7 +214,23 @@ export class InventroBootstrapInitStack extends cdk.Stack {
           "action": "updateInventry",
           "data": $input.json('$')
         }`
-      }
+      },
+      integrationResponses: [
+        {
+          statusCode: "200",
+          responseTemplates: {
+            "application/json": "$input.body"
+          }
+        }
+      ],
+      methodResponses: [
+        {
+          statusCode: "200",
+          responseModels: {
+            "application/json": apigateway.Model.EMPTY_MODEL
+          }
+        }
+      ]
     });
 
     //assign resource tags

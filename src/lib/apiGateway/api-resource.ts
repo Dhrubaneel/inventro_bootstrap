@@ -9,6 +9,8 @@ export interface ApiResourceProps {
     lambdaFunction: lambda.IFunction;
     httpMethod: string;
     requestTemplate?: { [contentType: string]: string };
+    integrationResponses?: apigateway.IntegrationResponse[];
+    methodResponses?: apigateway.MethodResponse[];
 }
 
 export class ApiResource extends Construct {
@@ -16,14 +18,13 @@ export class ApiResource extends Construct {
         super(scope, id);
 
         const parent = props.parentResource ?? props.restApi.root;
-
         const resource = parent.addResource(props.resourcePath);
 
-        // Create Lambda Integration
+        // Lambda Integration
         const lambdaIntegration = new apigateway.LambdaIntegration(props.lambdaFunction, {
             proxy: false,
             requestTemplates: props.requestTemplate,
-            integrationResponses: [
+            integrationResponses: props.integrationResponses ?? [
                 {
                     statusCode: "200",
                     responseTemplates: {
@@ -33,11 +34,14 @@ export class ApiResource extends Construct {
             ],
         });
 
-        // Add Method to Resource
+        // Add Method
         resource.addMethod(props.httpMethod, lambdaIntegration, {
-            methodResponses: [
+            methodResponses: props.methodResponses ?? [
                 {
                     statusCode: "200",
+                    responseModels: {
+                        "application/json": apigateway.Model.EMPTY_MODEL
+                    }
                 },
             ],
         });
