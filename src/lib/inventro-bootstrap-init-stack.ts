@@ -147,28 +147,9 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       resourcePath: INVENTRO_CONFIG_ENDPOINT_PATH_SYNC,
       lambdaFunction: inventro_service.function,
       httpMethod: 'POST',
-      requestTemplate: {
-        "application/json": `{
-          "action": "syncConfig",
-          "data": $input.json('$')
-        }`
-      },
-      integrationResponses: [
-        {
-          statusCode: "200",
-          responseTemplates: {
-            "application/json": "$input.body"
-          }
-        }
-      ],
-      methodResponses: [
-        {
-          statusCode: "200",
-          responseModels: {
-            "application/json": apigateway.Model.EMPTY_MODEL
-          }
-        }
-      ]
+      requestTemplate: generateRequestTemplate('syncConfig'),
+      integrationResponses: getDefaultIntegrationResponses(),
+      methodResponses: getDefaultMethodResponses()
     });
 
     const inventro_config_api_resource_upsert_method = new ApiResource(this, 'InventroConfigApiResourceUpsertMethod', {
@@ -177,28 +158,9 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       resourcePath: INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT,
       lambdaFunction: inventro_service.function,
       httpMethod: 'POST',
-      requestTemplate: {
-        "application/json": `{
-          "action": "upsertConfig",
-          "data": $input.json('$')
-        }`
-      },
-      integrationResponses: [
-        {
-          statusCode: "200",
-          responseTemplates: {
-            "application/json": "$input.body"
-          }
-        }
-      ],
-      methodResponses: [
-        {
-          statusCode: "200",
-          responseModels: {
-            "application/json": apigateway.Model.EMPTY_MODEL
-          }
-        }
-      ]
+      requestTemplate: generateRequestTemplate('upsertConfig'),
+      integrationResponses: getDefaultIntegrationResponses(),
+      methodResponses: getDefaultMethodResponses()
     });
 
     const inventro_inventry_api_resource = inventro_api.restApi.root.addResource(INVENTRO_INVENTRY_ENDPOINT);
@@ -209,28 +171,9 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       resourcePath: INVENTRO_Inventry_ENDPOINT_PATH_UPDATE,
       lambdaFunction: inventro_service.function,
       httpMethod: 'POST',
-      requestTemplate: {
-        "application/json": `{
-          "action": "updateInventry",
-          "data": $input.json('$')
-        }`
-      },
-      integrationResponses: [
-        {
-          statusCode: "200",
-          responseTemplates: {
-            "application/json": "$input.body"
-          }
-        }
-      ],
-      methodResponses: [
-        {
-          statusCode: "200",
-          responseModels: {
-            "application/json": apigateway.Model.EMPTY_MODEL
-          }
-        }
-      ]
+      requestTemplate: generateRequestTemplate('updateInventry'),
+      integrationResponses: getDefaultIntegrationResponses(),
+      methodResponses: getDefaultMethodResponses()
     });
 
     //assign resource tags
@@ -259,4 +202,50 @@ function addTagsToResources(resources: Construct[], tags: { [key: string]: strin
       cdk.Tags.of(resource).add(key, value);
     });
   });
+}
+
+function getDefaultIntegrationResponses(): apigateway.IntegrationResponse[] {
+  return [
+    {
+      statusCode: "200",
+      selectionPattern: "2\\d{2}", // Matches 200 range
+      responseTemplates: {
+        "application/json": "$input.body"
+      }
+    },
+    {
+      statusCode: "400",
+      selectionPattern: "4\\d{2}", // Matches 400 errors
+      responseTemplates: {
+        "application/json": `{"message": "Client error"}`
+      }
+    },
+    {
+      statusCode: "500",
+      selectionPattern: "5\\d{2}", // Matches 500 errors
+      responseTemplates: {
+        "application/json": `{"message": "Server error"}`
+      }
+    }
+  ];
+}
+
+function getDefaultMethodResponses(): apigateway.MethodResponse[] {
+  return [
+    {
+      statusCode: "200",
+      responseModels: {
+        "application/json": apigateway.Model.EMPTY_MODEL
+      }
+    }
+  ];
+}
+
+function generateRequestTemplate(action: string): { [contentType: string]: string } {
+  return {
+    "application/json": `{
+      "action": "${action}",
+      "data": $input.json('$')
+    }`
+  };
 }
