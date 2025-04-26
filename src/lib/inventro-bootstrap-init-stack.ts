@@ -5,8 +5,9 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import { Table } from './dynamodb/tables';
 import { ApiGateway } from './apiGateway/api';
 import { LambdaFunction } from './lambda/lambda';
-import { INVENTRO_CONFIG, INVENTRO_INVENTRY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE } from './constants';
+import { INVENTRO_CONFIG, INVENTRO_INVENTRY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_INVENTRY_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_Inventry_ENDPOINT_PATH_UPDATE } from './constants';
 import { IamRole } from './iam/iam';
+import { ApiResource } from './apiGateway/api-resource';
 
 export class InventroBootstrapInitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -115,7 +116,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       apiName: INVENTRO_API,
       description: 'API for Inventro application',
       stageName: 'prod',
-      cors: true
+      cors: false
     });
 
     const inventro_service_role = new IamRole(this, 'InventroServiceRole', {
@@ -136,6 +137,52 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       role: inventro_service_role.role,
     });
 
+    const inventro_config_api_resource = inventro_api.restApi.root.addResource(INVENTRO_CONFIG_ENDPOINT);
+
+    const inventro_config_api_resource_sync_method = new ApiResource(this, 'InventroConfigApiResourceSyncMethod', {
+      restApi: inventro_api.restApi,
+      parentResource: inventro_config_api_resource,
+      resourcePath: INVENTRO_CONFIG_ENDPOINT_PATH_SYNC,
+      lambdaFunction: inventro_service.function,
+      httpMethod: 'POST',
+      requestTemplate: {
+        "application/json": `{
+          "action": "syncConfig",
+          "data": $input.json('$')
+        }`
+      }
+    });
+
+    const inventro_config_api_resource_upsert_method = new ApiResource(this, 'InventroConfigApiResourceUpsertMethod', {
+      restApi: inventro_api.restApi,
+      parentResource: inventro_config_api_resource,
+      resourcePath: INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT,
+      lambdaFunction: inventro_service.function,
+      httpMethod: 'POST',
+      requestTemplate: {
+        "application/json": `{
+          "action": "upsertConfig",
+          "data": $input.json('$')
+        }`
+      }
+    });
+
+    const inventro_inventry_api_resource = inventro_api.restApi.root.addResource(INVENTRO_INVENTRY_ENDPOINT);
+
+    const inventro_inventry_api_resource_update_method = new ApiResource(this, 'InventroInventryApiResourceUpdateMethod', {
+      restApi: inventro_api.restApi,
+      parentResource: inventro_inventry_api_resource,
+      resourcePath: INVENTRO_Inventry_ENDPOINT_PATH_UPDATE,
+      lambdaFunction: inventro_service.function,
+      httpMethod: 'POST',
+      requestTemplate: {
+        "application/json": `{
+          "action": "updateInventry",
+          "data": $input.json('$')
+        }`
+      }
+    });
+
     //assign resource tags
     addTagsToResources(
       [
@@ -144,7 +191,12 @@ export class InventroBootstrapInitStack extends cdk.Stack {
         shopping_list_table,
         inventro_api,
         inventro_service,
-        inventro_service_role
+        inventro_service_role,
+        inventro_config_api_resource,
+        inventro_inventry_api_resource,
+        inventro_config_api_resource_sync_method,
+        inventro_config_api_resource_upsert_method,
+        inventro_inventry_api_resource_update_method
       ],
       { 'Project': 'Inventro' }
     );
