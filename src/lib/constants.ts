@@ -1,5 +1,6 @@
 export const INVENTRO_CONFIG = "inventro_config";
-export const INVENTRO_INVENTRY = "inventro_inventry";
+export const INVENTRO_INVENTORY = "inventro_inventory";
+export const INVENTRO_TRANSACTION = "inventro_transaction";
 export const INVENTRO_SHOPPING_LIST = "inventro_shopping_list";
 export const INVENTRO_API = "inventro_api";
 export const INVENTRO_SERVICE = "inventro_service";
@@ -7,6 +8,8 @@ export const INVENTRO_SERVICE_TIMEOUT = 30;
 export const INVENTRO_SERVICE_ROLE = "inventro_service_role";
 export const INVENTRO_CONFIG_ENDPOINT = "config"
 export const INVENTRO_INVENTRY_ENDPOINT = "inventry"
+export const INVENTRO_TRANSACTION_ENDPOINT = "transaction"
 export const INVENTRO_CONFIG_ENDPOINT_PATH_SYNC = "sync"
 export const INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT = "upsert"
-export const INVENTRO_Inventry_ENDPOINT_PATH_UPDATE = "update"
+export const INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE = "update"
+export const INVENTRO_Inventory_ENDPOINT_PATH_FETCH = "fetch"

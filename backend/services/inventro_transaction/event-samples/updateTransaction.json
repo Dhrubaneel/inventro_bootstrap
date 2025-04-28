@@ -1,9 +1,9 @@
 {
-    "action": "updateInventry",
+    "action": "updateTransaction",
     "data": [
         {
-            "itemId": "8909106022089", 
             "transactionId": "735a9629-e126-4249-a0e7-6a6d76505862", 
+            "itemId": "8909106022089", 
             "timestamp": "2025-04-06T05:34:16.882Z",
             "transactionType": "add",
             "itemName": "Comfort",
@@ -20,8 +20,8 @@
             "location": "Utility Balcony Storage"
         },
         {
-            "itemId": "8909106022089", 
             "transactionId": "eaad1e91-03c1-409f-ab54-230c330e0577", 
+            "itemId": "8909106022089", 
             "timestamp": "2025-04-06T07:34:16.882Z",
             "transactionType": "remove",   
             "itemName": "Comfort",

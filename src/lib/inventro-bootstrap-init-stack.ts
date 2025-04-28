@@ -6,7 +6,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import { Table } from './dynamodb/tables';
 import { ApiGateway } from './apiGateway/api';
 import { LambdaFunction } from './lambda/lambda';
-import { INVENTRO_CONFIG, INVENTRO_INVENTRY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_INVENTRY_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_Inventry_ENDPOINT_PATH_UPDATE } from './constants';
+import { INVENTRO_CONFIG, INVENTRO_INVENTORY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_TRANSACTION_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE, INVENTRO_TRANSACTION, INVENTRO_INVENTRY_ENDPOINT, INVENTRO_Inventory_ENDPOINT_PATH_FETCH } from './constants';
 import { IamRole } from './iam/iam';
 import { ApiResource } from './apiGateway/api-resource';
 
@@ -20,10 +20,9 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       sortKey: 'sk'
     });
 
-    const inventry_table = new Table(this, 'InventroInventry', {
-      tableName: INVENTRO_INVENTRY,
+    const inventory_table = new Table(this, 'InventroInventory', {
+      tableName: INVENTRO_INVENTORY,
       partitionKey: 'itemId',
-      sortKey: 'transactionId',
       globalSecondaryIndexes: [
         {
           indexName: 'items_by_type',
@@ -68,7 +67,15 @@ export class InventroBootstrapInitStack extends cdk.Stack {
             name: 'itemId',
             type: dynamodb.AttributeType.STRING
           }
-        },
+        }
+      ]
+    });
+
+    const transaction_table = new Table(this, 'InventroTransaction', {
+      tableName: INVENTRO_TRANSACTION,
+      partitionKey: 'transactionId',
+      sortKey: 'itemId',
+      globalSecondaryIndexes: [
         {
           indexName: 'items_by_transaction_type',
           partitionKey: {
@@ -80,7 +87,8 @@ export class InventroBootstrapInitStack extends cdk.Stack {
             type: dynamodb.AttributeType.STRING
           }
         }
-      ]
+      ],
+      stream: dynamodb.StreamViewType.NEW_IMAGE
     });
 
     const shopping_list_table = new Table(this, 'InventroShoppingList', {
@@ -163,15 +171,28 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       methodResponses: getDefaultMethodResponses()
     });
 
-    const inventro_inventry_api_resource = inventro_api.restApi.root.addResource(INVENTRO_INVENTRY_ENDPOINT);
+    const inventro_transaction_api_resource = inventro_api.restApi.root.addResource(INVENTRO_TRANSACTION_ENDPOINT);
 
-    const inventro_inventry_api_resource_update_method = new ApiResource(this, 'InventroInventryApiResourceUpdateMethod', {
+    const inventro_transaction_api_resource_update_method = new ApiResource(this, 'InventroTransactionApiResourceUpdateMethod', {
       restApi: inventro_api.restApi,
-      parentResource: inventro_inventry_api_resource,
-      resourcePath: INVENTRO_Inventry_ENDPOINT_PATH_UPDATE,
+      parentResource: inventro_transaction_api_resource,
+      resourcePath: INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE,
       lambdaFunction: inventro_service.function,
       httpMethod: 'POST',
-      requestTemplate: generateRequestTemplate('updateInventry'),
+      requestTemplate: generateRequestTemplate('updateTransaction'),
+      integrationResponses: getDefaultIntegrationResponses(),
+      methodResponses: getDefaultMethodResponses()
+    });
+
+    const inventro_inventory_api_resource = inventro_api.restApi.root.addResource(INVENTRO_INVENTRY_ENDPOINT);
+
+    const inventro_inventory_api_resource_fetch_method = new ApiResource(this, 'InventroInventoryApiResourceFetchMethod', {
+      restApi: inventro_api.restApi,
+      parentResource: inventro_inventory_api_resource,
+      resourcePath: INVENTRO_Inventory_ENDPOINT_PATH_FETCH,
+      lambdaFunction: inventro_service.function,
+      httpMethod: 'POST',
+      requestTemplate: generateRequestTemplate('fetchInventory'),
       integrationResponses: getDefaultIntegrationResponses(),
       methodResponses: getDefaultMethodResponses()
     });
@@ -180,16 +201,19 @@ export class InventroBootstrapInitStack extends cdk.Stack {
     addTagsToResources(
       [
         config_table,
-        inventry_table,
+        inventory_table,
+        transaction_table,
         shopping_list_table,
         inventro_api,
         inventro_service,
         inventro_service_role,
         inventro_config_api_resource,
-        inventro_inventry_api_resource,
+        inventro_inventory_api_resource,
+        inventro_transaction_api_resource,
         inventro_config_api_resource_sync_method,
         inventro_config_api_resource_upsert_method,
-        inventro_inventry_api_resource_update_method
+        inventro_transaction_api_resource_update_method,
+        inventro_inventory_api_resource_fetch_method
       ],
       { 'Project': 'Inventro' }
     );

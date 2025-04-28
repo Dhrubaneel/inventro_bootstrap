@@ -1,0 +1,6 @@
+{
+    "action": "fetchInventory",
+    "data": {
+        "nextToken": "eyJh"
+    }
+}

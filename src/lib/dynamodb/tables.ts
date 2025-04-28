@@ -16,6 +16,7 @@ export class Table extends Construct {
       globalSecondaryIndexes: props?.globalSecondaryIndexes,
       encryption: dynamodb.TableEncryptionV2.awsManagedKey(),
       billing: dynamodb.Billing.onDemand(),
+      dynamoStream: props?.stream ? props.stream : undefined,
       removalPolicy: cdk.RemovalPolicy.RETAIN
     });
   }
@@ -25,5 +26,6 @@ export interface DynamoDBTableProps {
   tableName: string;
   partitionKey: string;
   sortKey?: string;  
-  globalSecondaryIndexes?: dynamodb.GlobalSecondaryIndexPropsV2[]
+  globalSecondaryIndexes?: dynamodb.GlobalSecondaryIndexPropsV2[];
+  stream?: dynamodb.StreamViewType;
 }

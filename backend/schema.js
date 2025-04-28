@@ -23,8 +23,8 @@ export const updateConfigSchema = {
     }
 }
 
-export const updateInventrySchema = {
-    id: "/UpdateInventry",
+export const updateTransactionSchema = {
+    id: "/UpdateTransaction",
     type: "array",
     items: {
         type: "object",
@@ -47,5 +47,13 @@ export const updateInventrySchema = {
             location: { type: "string" }
         },
         required: ["itemId", "transactionId", "timestamp", "transactionType", "itemName", "type", "category", "brand", "quantityChanged", "unit", "location"]
+    }
+}
+
+export const fetchInventorySchema = {
+    id: "/GetInventory",
+    type: "object",
+    properties: {
+        nextToken: { type: "string" }
     }
 }
