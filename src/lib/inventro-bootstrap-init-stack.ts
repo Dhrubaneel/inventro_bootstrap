@@ -6,7 +6,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import { Table } from './dynamodb/tables';
 import { ApiGateway } from './apiGateway/api';
 import { LambdaFunction } from './lambda/lambda';
-import { INVENTRO_CONFIG, INVENTRO_INVENTORY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_TRANSACTION_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE, INVENTRO_TRANSACTION, INVENTRO_INVENTRY_ENDPOINT, INVENTRO_Inventory_ENDPOINT_PATH_FETCH } from './constants';
+import { INVENTRO_CONFIG, INVENTRO_INVENTORY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_TRANSACTION_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE, INVENTRO_TRANSACTION, INVENTRO_INVENTORY_ENDPOINT, INVENTRO_INVENTORY_ENDPOINT_PATH_FETCH } from './constants';
 import { IamRole } from './iam/iam';
 import { ApiResource } from './apiGateway/api-resource';
 
@@ -184,12 +184,12 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       methodResponses: getDefaultMethodResponses()
     });
 
-    const inventro_inventory_api_resource = inventro_api.restApi.root.addResource(INVENTRO_INVENTRY_ENDPOINT);
+    const inventro_inventory_api_resource = inventro_api.restApi.root.addResource(INVENTRO_INVENTORY_ENDPOINT);
 
     const inventro_inventory_api_resource_fetch_method = new ApiResource(this, 'InventroInventoryApiResourceFetchMethod', {
       restApi: inventro_api.restApi,
       parentResource: inventro_inventory_api_resource,
-      resourcePath: INVENTRO_Inventory_ENDPOINT_PATH_FETCH,
+      resourcePath: INVENTRO_INVENTORY_ENDPOINT_PATH_FETCH,
       lambdaFunction: inventro_service.function,
       httpMethod: 'POST',
       requestTemplate: generateRequestTemplate('fetchInventory'),
