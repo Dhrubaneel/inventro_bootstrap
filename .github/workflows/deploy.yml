@@ -60,4 +60,4 @@ jobs:
 
       - name: Deploy
         run: |
-          cdk deploy --require-approval never
+          cdk destroy --require-approval never
