@@ -310,11 +310,6 @@ function generateRequestTemplate(action: string): { [contentType: string]: strin
 function generateTransactionPipeTemplate(): string {
   return JSON.stringify({
     action: "calculateInventory",
-    data: {
-      transactionId: "$.dynamodb.NewImage.transactionId.S",
-      itemId: "$.dynamodb.NewImage.itemId.S",
-      transactionType: "$.dynamodb.NewImage.transactionType.S",
-      quantityChanged: "$.dynamodb.NewImage.quantityChanged.N"
-    }
+    data: "$.dynamodb.NewImage" 
   });
 }

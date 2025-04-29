@@ -7,7 +7,7 @@ export interface PipeProps {
   sourceStreamArn: string;
   targetLambdaArn: string;
   role: iam.IRole;
-  inputTemplate: string; 
+  inputTemplate: string;
 }
 
 export class Pipe extends Construct {
@@ -24,12 +24,12 @@ export class Pipe extends Construct {
       sourceParameters: {
         dynamoDbStreamParameters: {
           startingPosition: 'LATEST',
-          batchSize: 1,
+          batchSize: 10,
           maximumBatchingWindowInSeconds: 1,
         }
       },
       targetParameters: {
-        inputTemplate: props.inputTemplate 
+        inputTemplate: props.inputTemplate
       }
     });
   }
