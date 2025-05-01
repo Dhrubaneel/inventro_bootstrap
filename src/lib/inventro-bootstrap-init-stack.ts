@@ -7,7 +7,7 @@ import { Table } from './dynamodb/tables';
 import { ApiGateway } from './apiGateway/api';
 import { LambdaFunction } from './lambda/lambda';
 import { Pipe } from './eventbridge/pipe';
-import { INVENTRO_CONFIG, INVENTRO_INVENTORY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_TRANSACTION_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE, INVENTRO_TRANSACTION, INVENTRO_INVENTORY_ENDPOINT, INVENTRO_INVENTORY_ENDPOINT_PATH_FETCH, INVENTRO_EVENTBRIDGE_PIPE_ROLE, INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE } from './constants';
+import { INVENTRO_CONFIG, INVENTRO_INVENTORY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_TRANSACTION_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE, INVENTRO_TRANSACTION, INVENTRO_INVENTORY_ENDPOINT, INVENTRO_INVENTORY_ENDPOINT_PATH_FETCH, INVENTRO_EVENTBRIDGE_PIPE_ROLE, INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE, INVENTRO_CALCULATE_ENDPOINT, INVENTRO_CALCULATE_ENDPOINT_PATH_INVENTORY } from './constants';
 import { IamRole } from './iam/iam';
 import { ApiResource } from './apiGateway/api-resource';
 import { Function } from 'aws-cdk-lib/aws-lambda';
@@ -220,13 +220,26 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       methodResponses: getDefaultMethodResponses()
     });
 
-    const inventro_transaction_pipe = new Pipe(this, 'InventroTransactionPipe', {
-      pipeName: INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE,
-      sourceStreamArn: transaction_table.table.tableStreamArn!,
-      targetLambdaArn: inventro_service.function.functionArn,
-      role: inventro_eventbridge_pipe_role.role,
-      inputTemplate: generateTransactionPipeTemplate()
+    const inventro_calculate_api_resource = inventro_api.restApi.root.addResource(INVENTRO_CALCULATE_ENDPOINT);
+
+    const inventro_calculate_api_resource_inventory_method = new ApiResource(this, 'InventroCalculateApiResourceInventoryMethod', {
+      restApi: inventro_api.restApi,
+      parentResource: inventro_calculate_api_resource,
+      resourcePath: INVENTRO_CALCULATE_ENDPOINT_PATH_INVENTORY,
+      lambdaFunction: inventro_service.function,
+      httpMethod: 'POST',
+      requestTemplate: generateRequestTemplate('calculateInventory'),
+      integrationResponses: getDefaultIntegrationResponses(),
+      methodResponses: getDefaultMethodResponses()
     });
+
+    // const inventro_transaction_pipe = new Pipe(this, 'InventroTransactionPipe', {
+    //   pipeName: INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE,
+    //   sourceStreamArn: transaction_table.table.tableStreamArn!,
+    //   targetLambdaArn: inventro_service.function.functionArn,
+    //   role: inventro_eventbridge_pipe_role.role,
+    //   inputTemplate: generateTransactionPipeTemplate()
+    // });
 
     //assign resource tags
     addTagsToResources(
@@ -246,7 +259,9 @@ export class InventroBootstrapInitStack extends cdk.Stack {
         inventro_config_api_resource_upsert_method,
         inventro_transaction_api_resource_update_method,
         inventro_inventory_api_resource_fetch_method,
-        inventro_transaction_pipe
+        // inventro_transaction_pipe,
+        inventro_calculate_api_resource,
+        inventro_calculate_api_resource_inventory_method
       ],
       { 'Project': 'Inventro' }
     );

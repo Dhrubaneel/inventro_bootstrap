@@ -9,7 +9,7 @@ config({ path: envPath });
 
 export async function fetchCloudInventory(nextToken = undefined) {
     const params = {
-        TableName: process.env.INVENTRY_TABLE,
+        TableName: process.env.INVENTORY_TABLE,
         ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
     };
     return await syncCloudData(params);
