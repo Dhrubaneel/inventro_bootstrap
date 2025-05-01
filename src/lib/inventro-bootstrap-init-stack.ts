@@ -250,7 +250,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
     const inventro_transaction_pipe = new Pipe(this, 'InventroTransactionPipe', {
       pipeName: INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE,
       sourceStreamArn: transaction_table.table.tableStreamArn!,
-      targetApiUrl: `https://${inventro_api.restApi.restApiId}.execute-api.${this.region}.amazonaws.com/${inventro_api.restApi.deploymentStage}/${INVENTRO_CALCULATE_ENDPOINT}/${INVENTRO_CALCULATE_ENDPOINT_PATH_INVENTORY}`,
+      targetApiUrl: 'https://p1sdbw5hqe.execute-api.ap-south-1.amazonaws.com/prod/calculate/inventory',
       role: inventro_eventbridge_pipe_role.role
     });
 
