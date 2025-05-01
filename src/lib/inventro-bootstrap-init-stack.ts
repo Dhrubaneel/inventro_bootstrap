@@ -237,8 +237,10 @@ export class InventroBootstrapInitStack extends cdk.Stack {
           {
             "action": "calculateInventory",
             "data": {
+              "eventName": "$inputRoot.eventName",
               "transactionId": "$inputRoot.dynamodb.NewImage.transactionId.S",
-              "itemId": "$inputRoot.dynamodb.NewImage.itemId.S"
+              "itemId": "$inputRoot.dynamodb.NewImage.itemId.S",
+              "transactionType": "$inputRoot.dynamodb.NewImage.transactionType.S"
             }
           }
         `
