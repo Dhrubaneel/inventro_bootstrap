@@ -164,8 +164,11 @@ export class InventroBootstrapInitStack extends cdk.Stack {
           resources: [transaction_table.table.tableStreamArn!],
         }),
         new iam.PolicyStatement({
-          actions: ['lambda:InvokeFunction'],
-          resources: [inventro_service.function.functionArn],
+          actions: [
+            'execute-api:Invoke',
+            'execute-api:ManageConnections'
+          ],
+          resources: [inventro_api.restApi.arnForExecuteApi()],
         })
       ]
     });
@@ -233,16 +236,12 @@ export class InventroBootstrapInitStack extends cdk.Stack {
           #set($inputRoot = $input.path('$'))
           {
             "action": "calculateInventory",
-            "data": [
-              #foreach($record in $inputRoot)
-              {
-                "transactionId": "$record.dynamodb.NewImage.transactionId.S",
-                "itemId": "$record.dynamodb.NewImage.itemId.S",
-                "transactionType": "$record.dynamodb.NewImage.transactionType.S",
-                "quantityChanged": $record.dynamodb.NewImage.quantityChanged.N
-              }#if($foreach.hasNext),#end
-              #end
-            ]
+            "data": {
+              "transactionId": "$inputRoot.dynamodb.NewImage.transactionId.S",
+              "itemId": "$inputRoot.dynamodb.NewImage.itemId.S",
+              "transactionType": "$inputRoot.dynamodb.NewImage.transactionType.S",
+              "quantityChanged": $inputRoot.dynamodb.NewImage.quantityChanged.N
+            }
           }
         `
       },
