@@ -228,7 +228,24 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       resourcePath: INVENTRO_CALCULATE_ENDPOINT_PATH_INVENTORY,
       lambdaFunction: inventro_service.function,
       httpMethod: 'POST',
-      requestTemplate: generateRequestTemplate('calculateInventory'),
+      requestTemplate: {
+        "application/json": `
+          #set($inputRoot = $input.path('$'))
+          {
+            "action": "calculateInventory",
+            "data": [
+              #foreach($record in $inputRoot)
+              {
+                "transactionId": "$record.dynamodb.NewImage.transactionId.S",
+                "itemId": "$record.dynamodb.NewImage.itemId.S",
+                "transactionType": "$record.dynamodb.NewImage.transactionType.S",
+                "quantityChanged": $record.dynamodb.NewImage.quantityChanged.N
+              }#if($foreach.hasNext),#end
+              #end
+            ]
+          }
+        `
+      },
       integrationResponses: getDefaultIntegrationResponses(),
       methodResponses: getDefaultMethodResponses()
     });
