@@ -5,9 +5,8 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 export interface PipeProps {
   pipeName: string;
   sourceStreamArn: string;
-  targetLambdaArn: string;
+  targetApiUrl: string;
   role: iam.IRole;
-  inputTemplate: string;
 }
 
 export class Pipe extends Construct {
@@ -20,16 +19,20 @@ export class Pipe extends Construct {
       name: props.pipeName,
       roleArn: props.role.roleArn,
       source: props.sourceStreamArn,
-      target: props.targetLambdaArn,
+      target: props.targetApiUrl,
       sourceParameters: {
         dynamoDbStreamParameters: {
           startingPosition: 'LATEST',
-          batchSize: 10,
+          batchSize: 1,
           maximumBatchingWindowInSeconds: 1,
         }
       },
       targetParameters: {
-        inputTemplate: props.inputTemplate
+        httpParameters: {
+          headerParameters: { 
+            'Content-Type': 'application/json'
+          }
+        }
       }
     });
   }

@@ -238,9 +238,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
             "action": "calculateInventory",
             "data": {
               "transactionId": "$inputRoot.dynamodb.NewImage.transactionId.S",
-              "itemId": "$inputRoot.dynamodb.NewImage.itemId.S",
-              "transactionType": "$inputRoot.dynamodb.NewImage.transactionType.S",
-              "quantityChanged": $inputRoot.dynamodb.NewImage.quantityChanged.N
+              "itemId": "$inputRoot.dynamodb.NewImage.itemId.S"
             }
           }
         `
@@ -249,13 +247,12 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       methodResponses: getDefaultMethodResponses()
     });
 
-    // const inventro_transaction_pipe = new Pipe(this, 'InventroTransactionPipe', {
-    //   pipeName: INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE,
-    //   sourceStreamArn: transaction_table.table.tableStreamArn!,
-    //   targetLambdaArn: inventro_service.function.functionArn,
-    //   role: inventro_eventbridge_pipe_role.role,
-    //   inputTemplate: generateTransactionPipeTemplate()
-    // });
+    const inventro_transaction_pipe = new Pipe(this, 'InventroTransactionPipe', {
+      pipeName: INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE,
+      sourceStreamArn: transaction_table.table.tableStreamArn!,
+      targetApiUrl: `https://${inventro_api.restApi.restApiId}.execute-api.${this.region}.amazonaws.com/${inventro_api.restApi.deploymentStage}/${INVENTRO_CALCULATE_ENDPOINT}/${INVENTRO_CALCULATE_ENDPOINT_PATH_INVENTORY}`,
+      role: inventro_eventbridge_pipe_role.role
+    });
 
     //assign resource tags
     addTagsToResources(
@@ -275,7 +272,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
         inventro_config_api_resource_upsert_method,
         inventro_transaction_api_resource_update_method,
         inventro_inventory_api_resource_fetch_method,
-        // inventro_transaction_pipe,
+        inventro_transaction_pipe,
         inventro_calculate_api_resource,
         inventro_calculate_api_resource_inventory_method
       ],
@@ -336,11 +333,4 @@ function generateRequestTemplate(action: string): { [contentType: string]: strin
       "data": $input.json('$')
     }`
   };
-}
-
-function generateTransactionPipeTemplate(): string {
-  return JSON.stringify({
-    action: "calculateInventory",
-    data: "$.dynamodb.NewImage" 
-  });
 }
