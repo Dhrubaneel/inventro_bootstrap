@@ -30,7 +30,7 @@ export const calculateCurrentInventoryStatus = (allTransactions) => {
         } 
     }
     if (itemQuantity === 0) {
-        locations = [];
+        locations.length = 0;
     }
     return {
         itemId: firstAddTransaction.itemId,
