@@ -17,6 +17,7 @@ export const calculateInventory = async (event) => {
             updateItemInventoryStatus(event.itemId, currentInventoryStatus);
             if(currentInventoryStatus.quantity <= 0) {
                 console.log(`Item ${event.itemId} is out of stock`);
+                await new Promise(res => setTimeout(res, 5000)); // Wait for 5 seconds before updating TTL
                 updateTTLForOldTransaction(allTransactions);
             }
         } else {
