@@ -88,9 +88,17 @@ export class InventroBootstrapInitStack extends cdk.Stack {
             name: 'itemId',
             type: dynamodb.AttributeType.STRING
           }
+        },
+        {
+          indexName: 'transaction_by_itemId',
+          partitionKey: {
+            name: 'itemId',
+            type: dynamodb.AttributeType.STRING
+          }
         }
       ],
-      stream: dynamodb.StreamViewType.NEW_IMAGE
+      stream: dynamodb.StreamViewType.NEW_IMAGE,
+      ttlAttributeName: 'expiredBy'
     });
 
     const shopping_list_table = new Table(this, 'InventroShoppingList', {

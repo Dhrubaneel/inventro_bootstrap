@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { ScanCommand, DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { ScanCommand, DynamoDBDocumentClient, UpdateCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { config } from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -56,4 +56,20 @@ export async function updateItems(tableName, items, buildParamsFn) {
     });
 
     return await upsertCloudData(updatePromises);
+}
+
+export async function queryCloudData(params) {
+    const command = new QueryCommand(params);
+
+    try {
+        const data = await ddbDocClient.send(command);
+        console.log("Query results:", data.Items);
+        return {
+            items: data.Items,
+            nextToken: data.LastEvaluatedKey ? JSON.stringify(data.LastEvaluatedKey) : null
+        };
+    } catch (error) {
+        console.error("Error querying DynamoDB:", error);
+        throw error;
+    }
 }

@@ -17,7 +17,8 @@ export class Table extends Construct {
       encryption: dynamodb.TableEncryptionV2.awsManagedKey(),
       billing: dynamodb.Billing.onDemand(),
       dynamoStream: props?.stream ? props.stream : undefined,
-      removalPolicy: cdk.RemovalPolicy.RETAIN
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      timeToLiveAttribute: props?.ttlAttributeName
     });
   }
 }
@@ -28,4 +29,5 @@ export interface DynamoDBTableProps {
   sortKey?: string;  
   globalSecondaryIndexes?: dynamodb.GlobalSecondaryIndexPropsV2[];
   stream?: dynamodb.StreamViewType;
+  ttlAttributeName?: string;
 }

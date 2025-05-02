@@ -1,0 +1,9 @@
+{
+    "action": "calculateInventory",
+    "data": {
+        "eventName": "REMOVE",
+        "transactionId": "",
+        "itemId": "",
+        "transactionType": ""
+    }
+}
