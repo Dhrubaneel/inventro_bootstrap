@@ -1,4 +1,4 @@
-import { queryCloudData } from "../../dynamodb.js";
+import { queryCloudData, updateItems } from "../../dynamodb.js";
 import { config } from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -9,12 +9,12 @@ config({ path: envPath });
 
 export async function getAllTransactionsOfAnItemId(pkValue, nextToken = undefined) {
     const params = {
-        TableName: process.env.INVENTORY_TABLE,
+        TableName: process.env.TRANSACTION_TABLE,
         IndexName: 'transaction_by_itemId', 
         KeyConditionExpression: "#pk = :pkValue",
         FilterExpression: "attribute_not_exists(#expiredBy)",
         ExpressionAttributeNames: {
-            "#pk": "pk",
+            "#pk": "itemId",
             "#expiredBy": "expiredBy"
         },
         ExpressionAttributeValues: {
@@ -23,5 +23,69 @@ export async function getAllTransactionsOfAnItemId(pkValue, nextToken = undefine
         ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
     };
 
-    return await queryCloudData(params);
+    const result = await queryCloudData(params);
+
+    result.items.sort((a, b) => a.transactionType.localeCompare(b.transactionType));
+
+    return result;
+}
+
+export async function updateItemInventoryStatus(itemId, inventoryStatus) {
+    return await updateItems(process.env.INVENTORY_TABLE, [inventoryStatus], (item, tableName) => ({
+        TableName: tableName,
+        Key: {
+            itemId: itemId
+        },
+        UpdateExpression: `SET ${Object.keys(inventoryStatus)
+            .filter(key => key !== "itemId")
+            .map(key => `#${key} = :${key}`)
+            .join(", ")}`,
+        ExpressionAttributeNames: Object.keys(inventoryStatus)
+            .filter(key => key !== "itemId")
+            .reduce((acc, key) => {
+                acc[`#${key}`] = key;
+                return acc;
+            }, {}),
+        ExpressionAttributeValues: Object.keys(inventoryStatus)
+            .filter(key => key !== "itemId")
+            .reduce((acc, key) => {
+                acc[`:${key}`] = inventoryStatus[key];
+                return acc;
+            }, {}),
+        ReturnValues: "NONE"
+    }));
+}
+
+export async function updateTTLForOldTransaction(allTransactions) {
+    const currentTimeInSeconds = Math.floor(Date.now() / 1000); // Current time in seconds
+    const oneYearInSeconds = 365 * 24 * 60 * 60; // 1 year in seconds
+    const ttlValue = currentTimeInSeconds + oneYearInSeconds; // TTL value 1 year from now
+
+    const updatePromises = allTransactions.map(transaction => {
+        const params = {
+            TableName: process.env.TRANSACTION_TABLE,
+            Key: {
+                itemId: transaction.itemId, // Partition key
+                transactionId: transaction.transactionId // Sort key
+            },
+            UpdateExpression: "SET #expiredBy = :expiredBy",
+            ExpressionAttributeNames: {
+                "#expiredBy": "expiredBy"
+            },
+            ExpressionAttributeValues: {
+                ":expiredBy": ttlValue
+            },
+            ReturnValues: "NONE"
+        };
+
+        return updateItems(process.env.TRANSACTION_TABLE, [transaction], () => params);
+    });
+
+    try {
+        await Promise.all(updatePromises);
+        console.log(`Updated TTL for ${allTransactions.length} transactions.`);
+    } catch (error) {
+        console.error("Error updating TTL for transactions:", error);
+        throw error;
+    }
 }
