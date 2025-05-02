@@ -5,7 +5,7 @@ export const calculateInventory = async (event) => {
     try {
         console.log("Input Event for calculateInventory: ", JSON.stringify(event));
 
-        if (["INSERT", "MODIFY"].includes(event.eventName)) {
+        if (event.eventName=="INSERT") {
             console.log(`Fetching transactions for itemId: ${event.itemId}`);
             const allTransactions = await getAllActiveTransactions(event.itemId);
             if(allTransactions.length === 0) {
@@ -17,7 +17,6 @@ export const calculateInventory = async (event) => {
             updateItemInventoryStatus(event.itemId, currentInventoryStatus);
             if(currentInventoryStatus.quantity <= 0) {
                 console.log(`Item ${event.itemId} is out of stock`);
-                await new Promise(res => setTimeout(res, 5000)); // Wait for 5 seconds before updating TTL
                 updateTTLForOldTransaction(allTransactions);
             }
         } else {
