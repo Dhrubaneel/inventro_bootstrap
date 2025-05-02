@@ -25,7 +25,7 @@ export const calculateCurrentInventoryStatus = (allTransactions) => {
         itemQuantity += transaction.quantityChanged;
         if (transaction.transactionType === "add") {
             locations.push(transaction.location);
-        } else if (transaction.transactionType === "remove" && !transaction.partialTransaction) {
+        } else if (transaction.transactionType === "remove" && (!transaction.partialTransaction || itemQuantity === 0)) {
             locations.splice(locations.indexOf(locations.find(item => item === transaction.location)), 1);
         }
     }
