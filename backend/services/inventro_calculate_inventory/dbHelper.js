@@ -58,8 +58,8 @@ export async function updateItemInventoryStatus(itemId, inventoryStatus) {
 
 export async function updateTTLForOldTransaction(allTransactions) {
     const currentTimeInSeconds = Math.floor(Date.now() / 1000); // Current time in seconds
-    const oneYearInSeconds = 365 * 24 * 60 * 60; // 1 year in seconds
-    const ttlValue = currentTimeInSeconds + oneYearInSeconds; // TTL value 1 year from now
+    const eighteenMonthsInSeconds = 18 * 30 * 24 * 60 * 60; // 18 months in seconds (approximation: 30 days per month)
+    const ttlValue = currentTimeInSeconds + eighteenMonthsInSeconds; // TTL value 18 months from now
 
     const updatePromises = allTransactions.map(transaction => {
         const params = {
