@@ -27,10 +27,10 @@ export const calculateCurrentInventoryStatus = (allTransactions) => {
             locations.push(transaction.location);
         } else if (transaction.transactionType === "remove" && !transaction.partialTransaction) {
             locations.splice(locations.indexOf(locations.find(item => item === transaction.location)), 1);
-            if (itemQuantity === 0) {
-                locations = [];
-            }
-        }
+        } 
+    }
+    if (itemQuantity === 0) {
+        locations = [];
     }
     return {
         itemId: firstAddTransaction.itemId,
