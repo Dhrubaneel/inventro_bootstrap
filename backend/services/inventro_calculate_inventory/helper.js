@@ -25,7 +25,7 @@ export const calculateCurrentInventoryStatus = (allTransactions) => {
         itemQuantity += transaction.quantityChanged;
         if (transaction.transactionType === "add") {
             locations.push(transaction.location);
-        } else if (transaction.transactionType === "remove") {
+        } else if (transaction.transactionType === "remove" && !transaction.partialTransaction) {
             locations.splice(locations.indexOf(locations.find(item => item === transaction.location)), 1);
         }
     }
@@ -41,13 +41,13 @@ export const calculateCurrentInventoryStatus = (allTransactions) => {
     }
 }
 
-const calculateItemCount = (items)=>{
+const calculateItemCount = (items) => {
     const counts = items.reduce((acc, val) => {
         acc[val] = (acc[val] || 0) + 1;
         return acc;
-      }, {});
-      
-      return Object.entries(counts)
+    }, {});
+
+    return Object.entries(counts)
         .map(([key, count]) => (count > 1 ? `${key}(${count})` : key))
         .join(', ');
 }

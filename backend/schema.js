@@ -44,7 +44,8 @@ export const updateTransactionSchema = {
             pricePerUnit: { type: "number" },
             mrpPerUnit: { type: "number" },
             supplier: { type: "string" },
-            location: { type: "string" }
+            location: { type: "string" },
+            partialTransaction: { type: "boolean" }
         },
         required: ["itemId", "transactionId", "timestamp", "transactionType", "itemName", "type", "category", "brand", "quantityChanged", "unit", "location"]
     }
