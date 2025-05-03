@@ -1,0 +1,8 @@
+{
+    "action": "addCustomShoppingItems",
+    "data": [{
+        "customItemType":"custom-1234",
+        "preferredItemName":"iodex",
+        "quantity":2
+    }]
+}

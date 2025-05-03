@@ -1,4 +1,5 @@
-import { queryCloudData } from "../../dynamodb.js";
+import { queryCloudData, updateItems } from "../../dynamodb.js";
+import { v4 as uuidv4 } from 'uuid';
 import { config } from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -21,4 +22,31 @@ export async function syncCloudShoppingList(dataType, nextToken = undefined) {
         ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
     };
     return await queryCloudData(params);
+}
+
+export async function addCustomShoppingListItem(customItems) {
+    return await updateItems(process.env.SHOPPING_LIST_TABLE, customItems, (item, tableName) => ({
+        TableName: tableName,
+        Key: {
+            itemType: item.customItemType, // Partition key
+            dataType: 'shoppingList'  // Sort key
+        },
+        UpdateExpression: `SET ${Object.keys(item)
+            .filter(key => key !== "customItemType" && key !== "itemType" && key !== "dataType") // Exclude customItemType and primary key attributes
+            .map(key => `#${key} = :${key}`)
+            .join(", ")}`,
+        ExpressionAttributeNames: Object.keys(item)
+            .filter(key => key !== "customItemType" && key !== "itemType" && key !== "dataType") // Exclude customItemType and primary key attributes
+            .reduce((acc, key) => {
+                acc[`#${key}`] = key;
+                return acc;
+            }, {}),
+        ExpressionAttributeValues: Object.keys(item)
+            .filter(key => key !== "customItemType" && key !== "itemType" && key !== "dataType") // Exclude customItemType and primary key attributes
+            .reduce((acc, key) => {
+                acc[`:${key}`] = item[key];
+                return acc;
+            }, {}),
+        ReturnValues: "NONE"
+    }));
 }

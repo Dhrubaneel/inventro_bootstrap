@@ -1,6 +1,6 @@
-import { syncCloudShoppingList } from './dbHelper.js';
+import { syncCloudShoppingList, addCustomShoppingListItem } from './dbHelper.js';
 import { Validator } from "jsonschema";
-import { fetchInventorySchema } from "../../schema.js";
+import { fetchInventorySchema, addCustomShoppingItemSchema } from "../../schema.js";
 
 export const syncInventoryList = async (event) => {
     try {
@@ -35,3 +35,24 @@ export const syncShoppingList = async (event) => {
         throw e;
     }
 }
+
+export const addCustomShoppingItem = async (event) => {
+    try {
+        console.log("Input Event for addCustomShoppingItem: ", JSON.stringify(event));
+        // Validate the event against the schema
+        const validationResult = new Validator().validate(event, addCustomShoppingItemSchema);
+        if (!validationResult.valid) {
+            console.error("Validation errors:", validationResult.errors);
+            throw new Error(validationResult.errors);
+        }
+        // Add isManuallyAdded: true to each object in the event array
+        event.forEach(item => {
+            item.isManuallyAdded = true;
+        });
+        return await addCustomShoppingListItem(event);
+    } catch (e) {
+        console.error("Error: ", e);
+        throw e;
+    }
+}
+

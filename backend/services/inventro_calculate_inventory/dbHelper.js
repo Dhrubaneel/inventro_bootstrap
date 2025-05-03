@@ -189,11 +189,14 @@ export async function getCurrentShoppingList(nextToken = undefined) {
         TableName: process.env.SHOPPING_LIST_TABLE,
         IndexName: 'items_by_dataType',
         KeyConditionExpression: "#pk = :pkValue",
+        FilterExpression: "attribute_not_exists(#isManuallyAdded) OR #isManuallyAdded = :isFalse", // Filter for isManuallyAdded
         ExpressionAttributeNames: {
             "#pk": "dataType",
+            "#isManuallyAdded": "isManuallyAdded"
         },
         ExpressionAttributeValues: {
             ":pkValue": 'shoppingList',
+            ":isFalse": false
         },
         ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
     };

@@ -58,3 +58,17 @@ export const fetchInventorySchema = {
         nextToken: { type: "string" }
     }
 }
+
+export const addCustomShoppingItemSchema = {
+    id: "/AddCustomShoppingItem",
+    type: "array",
+    items: {
+        type: "object",
+        properties: {
+            customItemType: { type: "string" },
+            preferredItemName: { type: "string" },
+            quantity: { type: "number" }
+        },
+        required: ["customItemType", "preferredItemName", "quantity"]
+    }
+}
