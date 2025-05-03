@@ -13,10 +13,10 @@ export async function syncCloudShoppingList(dataType, nextToken = undefined) {
         IndexName: 'items_by_dataType',
         KeyConditionExpression: "#pk = :pkValue",
         ExpressionAttributeNames: {
-            "#pk": dataType,
+            "#pk": "dataType",
         },
         ExpressionAttributeValues: {
-            ":pkValue": 'inventory',
+            ":pkValue": dataType,
         },
         ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
     };
