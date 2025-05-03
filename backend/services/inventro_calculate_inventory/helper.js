@@ -191,7 +191,8 @@ const prepareShoppingList = async (items) => {
             expectedPrice,
             expectedPricePerUnit,
             preferredItemId,
-            preferredItemName
+            preferredItemName,
+            preferredQuantity
         } = await calculatePrefferedSupplierAndBrand(item.itemType);
 
         shoppingList.push({
@@ -204,7 +205,8 @@ const prepareShoppingList = async (items) => {
             expectedPrice: expectedPrice,
             expectedPricePerUnit: expectedPricePerUnit,
             preferredItemId: preferredItemId,
-            preferredItemName: preferredItemName
+            preferredItemName: preferredItemName,
+            preferredQuantity: preferredQuantity
         });
     }
 
@@ -247,6 +249,7 @@ const calculatePrefferedSupplierAndBrand = async (itemType) => {
         expectedPricePerUnit: lowestPriceProcurement.pricePerUnit,
         preferredItemId: lowestPriceProcurement.itemId,
         preferredItemName: lowestPriceProcurement.itemName,
+        preferredQuantity: lowestPriceProcurement.quantityChanged
     };
 
 }
