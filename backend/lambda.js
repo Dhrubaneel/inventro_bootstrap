@@ -12,7 +12,7 @@ objFramework.subscribeHandler('upsertConfig', upsertConfig);
 objFramework.subscribeHandler('updateTransaction', updateTransaction);
 objFramework.subscribeHandler('fetchInventory', fetchInventory);
 objFramework.subscribeHandler('calculateInventory', calculateInventory);
-objFramework.subscribeHandler('syncInventryList', syncShoppingList);
+objFramework.subscribeHandler('syncInventoryList', syncShoppingList);
 
 const handler = objFramework.invoke.bind(objFramework);
 

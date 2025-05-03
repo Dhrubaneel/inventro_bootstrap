@@ -250,7 +250,7 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       resourcePath: INVENTRO_CONFIG_ENDPOINT_PATH_SYNC,
       lambdaFunction: inventro_service.function,
       httpMethod: 'POST',
-      requestTemplate: generateRequestTemplate('syncInventryList'),
+      requestTemplate: generateRequestTemplate('syncInventoryList'),
       integrationResponses: getDefaultIntegrationResponses(),
       methodResponses: getDefaultMethodResponses()
     });
