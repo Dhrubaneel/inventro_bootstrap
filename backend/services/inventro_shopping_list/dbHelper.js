@@ -58,15 +58,13 @@ export async function removeCustomShoppingListItem(customShoppingListItem) {
         }
 
         // Call deleteCloudData with the current shopping list
-        await deleteCloudData(process.env.SHOPPING_LIST_TABLE, customShoppingListItem, (item, tableName) => ({
+        return await deleteCloudData(process.env.SHOPPING_LIST_TABLE, customShoppingListItem, (item, tableName) => ({
             TableName: tableName,
             Key: {
                 itemType: item.itemType,
                 dataType: 'shoppingList'
             }
         }));
-
-        console.log(`Removed ${customShoppingListItem.length} items from the shopping list.`);
     } catch (error) {
         console.error("Error removing items from the shopping list:", error);
         throw error;
