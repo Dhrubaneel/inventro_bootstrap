@@ -1,4 +1,4 @@
-import { getAllTransactionsOfAnItemId, getInventoryByItemType, getConsumtionByItemType, getCurrentShoppingList, removeOldShoppingList, getItemsToAddInShoppingList } from "./dbHelper.js";
+import { getAllTransactionsOfAnItemId, getInventoryByItemType, getTransByTypeAndTransType, getCurrentShoppingList, removeOldShoppingList, getItemsToAddInShoppingList } from "./dbHelper.js";
 
 export const getAllActiveTransactions = async (itemId) => {
     try {
@@ -79,7 +79,7 @@ const calculateMonthlyConsumption = async (itemType) => {
 
         // Fetch all remove transactions for the last 6 months
         do {
-            const response = await getConsumtionByItemType(itemType, nextToken);
+            const response = await getTransByTypeAndTransType(itemType, 'remove', nextToken);
             removeTransactions.push(...response.items);
             nextToken = response.LastEvaluatedKey ? JSON.stringify(response.LastEvaluatedKey) : undefined;
         } while (nextToken);
@@ -168,9 +168,11 @@ export const generateShoppingList = async () => {
 
         console.log(`Fetched ${getLowStockItems.length} items to add in shopping list`);
 
-        const newShoppingList = prepareShoppingList(getLowStockItems);
+        const newShoppingList = await prepareShoppingList(getLowStockItems);
 
         console.log("New shopping list items: ", JSON.stringify(newShoppingList));
+
+        return newShoppingList;
 
     } catch (e) {
         console.error("Error generating shopping list: ", e);
@@ -178,16 +180,73 @@ export const generateShoppingList = async () => {
     }
 }
 
-const prepareShoppingList = (items) => {
-    const shoppingList = items.map(item => {
-        return {
+const prepareShoppingList = async (items) => {
+    const shoppingList = [];
+
+    for (const item of items) {
+        const {
+            preferredSupplier,
+            preferredBrand,
+            expectedMRP,
+            expectedPrice,
+            expectedPricePerUnit,
+            preferredItemId,
+            preferredItemName
+        } = await calculatePrefferedSupplierAndBrand(item.itemType);
+
+        shoppingList.push({
             itemType: item.itemType,
-            dataType: "shoppingList",
             quantity: Number(item.monthlyConsumption - item.currentInventory),
             units: item.units,
-            preferredSupplier:"",
-            preferredBrand:""
-        };
-    });
+            preferredSupplier: preferredSupplier,
+            preferredBrand: preferredBrand,
+            expectedMRP: expectedMRP,
+            expectedPrice: expectedPrice,
+            expectedPricePerUnit: expectedPricePerUnit,
+            preferredItemId: preferredItemId,
+            preferredItemName: preferredItemName
+        });
+    }
+
     return shoppingList;
+};
+
+const calculatePrefferedSupplierAndBrand = async (itemType) => {
+    const allProcurements = [];
+    let nextToken = undefined;
+    do {
+        const response = await getTransByTypeAndTransType(itemType, 'add', nextToken);
+        allProcurements.push(...response.items);
+        nextToken = response.LastEvaluatedKey ? JSON.stringify(response.LastEvaluatedKey) : undefined;
+    } while (nextToken);
+
+    allProcurements.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by timestamp in descending order
+
+    console.log(`Fetched ${allProcurements.length} procurement transactions for itemType: ${itemType}`);
+
+    // Find the procurement with the lowest pricePerUnit
+    const lowestPriceProcurement = allProcurements.reduce((lowest, current) => {
+        if (!lowest || current.pricePerUnit < lowest.pricePerUnit) {
+            return current;
+        }
+        return lowest;
+    }, null);
+
+    if (!lowestPriceProcurement) {
+        console.log("No procurements found with pricePerUnit.");
+        return { preferredSupplier: null, preferredBrand: null };
+    }
+
+    console.log(`Lowest price procurement: ${JSON.stringify(lowestPriceProcurement)}`);
+
+    return {
+        preferredSupplier: lowestPriceProcurement.supplier,
+        preferredBrand: lowestPriceProcurement.brand,
+        expectedMRP: lowestPriceProcurement.mrp,
+        expectedPrice: lowestPriceProcurement.price,
+        expectedPricePerUnit: lowestPriceProcurement.pricePerUnit,
+        preferredItemId: lowestPriceProcurement.itemId,
+        preferredItemName: lowestPriceProcurement.itemName,
+    };
+
 }

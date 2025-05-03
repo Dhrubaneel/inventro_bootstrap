@@ -1,5 +1,5 @@
 import { calculateCurrentInventoryStatus, getAllActiveTransactions, getInventoryStatusByItemType, calculateCumulativeInventoryStatus, generateShoppingList } from "./helper.js";
-import { updateItemInventoryStatus, updateTTLForOldTransaction, updateInventoryStockStatus } from "./dbHelper.js";
+import { updateItemInventoryStatus, updateTTLForOldTransaction, updateShopingListTable } from "./dbHelper.js";
 
 export const calculateInventory = async (event) => {
     try {
@@ -23,9 +23,14 @@ export const calculateInventory = async (event) => {
             }
             const currentCumulativeItemStatusInInventory = await calculateCumulativeInventoryStatus(event.itemType, currentInventoryByItemType);
             console.log(`Current Cumulative Inventory Status for itemType: ${event.itemType}`, JSON.stringify(currentCumulativeItemStatusInInventory));
-            await updateInventoryStockStatus(event.itemType, currentCumulativeItemStatusInInventory);
+            await updateInventoryStockStatus(event.itemType,"inventory", currentCumulativeItemStatusInInventory);
             console.log("Generate updated shopping list ...");
-            await generateShoppingList();
+            const newShoppingList = await generateShoppingList();
+            for(let item of newShoppingList) {
+                console.log(`Item ${item.itemId} is added to shopping list`);
+                await updateShopingListTable(item.itemType, "shoppingList", item);
+            }
+            console.log("Updated shopping list successfully.");
             if (currentInventoryStatus.quantity <= 0) {
                 console.log(`Item ${event.itemId} is out of stock`);
                 await updateTTLForOldTransaction(allTransactions);

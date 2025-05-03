@@ -109,7 +109,7 @@ export async function updateTTLForOldTransaction(allTransactions) {
     }
 }
 
-export async function getConsumtionByItemType(itemType, nextToken = undefined) {
+export async function getTransByTypeAndTransType(itemType, transactionType, nextToken = undefined) {
     // Calculate the timestamp for 6 months ago
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6); // Subtract 6 months
@@ -126,7 +126,7 @@ export async function getConsumtionByItemType(itemType, nextToken = undefined) {
             "#timestamp": "timestamp"
         },
         ExpressionAttributeValues: {
-            ":pkValue": 'remove',
+            ":pkValue": transactionType,
             ":skValue": itemType,
             ":oneWeekAgo": sixMonthsAgoISO
         },
@@ -137,12 +137,12 @@ export async function getConsumtionByItemType(itemType, nextToken = undefined) {
     return result;
 }
 
-export async function updateInventoryStockStatus(itemType, stockStatus) {
+export async function updateShopingListTable(itemType, datatype, stockStatus) {
     return await updateItems(process.env.SHOPPING_LIST_TABLE, [stockStatus], (item, tableName) => ({
         TableName: tableName,
         Key: {
             itemType: itemType,
-            dataType: "inventory"
+            dataType: datatype
         },
         UpdateExpression: `SET ${Object.keys(stockStatus)
             .filter(key => key !== "itemType")
@@ -212,7 +212,7 @@ export async function removeOldShoppingList(currentShoppingList) {
             TableName: tableName,
             Key: {
                 itemType: item.itemType,
-                dataType: item.dataType 
+                dataType: item.dataType
             }
         }));
 
