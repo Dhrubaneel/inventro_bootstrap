@@ -87,6 +87,13 @@ export class InventroBootstrapInitStack extends cdk.Stack {
             name: 'type',
             type: dynamodb.AttributeType.STRING
           }
+        },
+        {
+          indexName: 'transaction_by_itemId',
+          partitionKey: {
+            name: 'itemId',
+            type: dynamodb.AttributeType.STRING
+          }
         }
       ],
       stream: dynamodb.StreamViewType.NEW_IMAGE,
