@@ -10,19 +10,19 @@ export const calculateInventory = async (event) => {
             const allTransactions = await getAllActiveTransactions(event.itemId);
             if (allTransactions.length === 0) {
                 console.log(`No transactions found for itemId: ${event.itemId}`);
-                return;
+                return {};
             }
             const currentInventoryStatus = calculateCurrentInventoryStatus(allTransactions);
             console.log(`Current Inventory Status for : ${event.itemId}`, JSON.stringify(currentInventoryStatus));
             updateItemInventoryStatus(event.itemId, currentInventoryStatus);
             if (currentInventoryStatus.quantity <= 0) {
                 console.log(`Item ${event.itemId} is out of stock`);
-                updateTTLForOldTransaction(allTransactions);
+                await updateTTLForOldTransaction(allTransactions);
             }
         } else {
             console.log(`${event.eventName} is not supported`);
         }
-        return;
+        return {};
     } catch (e) {
         console.error("Error: ", e);
         throw e;

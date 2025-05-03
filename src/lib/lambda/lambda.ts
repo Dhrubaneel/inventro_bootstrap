@@ -16,7 +16,7 @@ export class LambdaFunction extends Construct {
       handler: props.handler,
       code: lambda.Code.fromAsset(props.codePath),
       environment: props.environment,
-      memorySize: props.memorySize ?? 128,
+      memorySize: props.memorySize ?? 256,
       timeout: props.timeout ?? cdk.Duration.seconds(10),
       description: props.description,
       role: props.role,
