@@ -1,4 +1,4 @@
-import { queryCloudData, updateItems } from "../../dynamodb.js";
+import { queryCloudData, updateItems, deleteCloudData } from "../../dynamodb.js";
 import { config } from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -137,12 +137,12 @@ export async function getConsumtionByItemType(itemType, nextToken = undefined) {
     return result;
 }
 
-export async function updateInventoryStockStatus(itemType,stockStatus){
+export async function updateInventoryStockStatus(itemType, stockStatus) {
     return await updateItems(process.env.SHOPPING_LIST_TABLE, [stockStatus], (item, tableName) => ({
         TableName: tableName,
         Key: {
-            itemType : itemType,
-            dataType : "inventory"
+            itemType: itemType,
+            dataType: "inventory"
         },
         UpdateExpression: `SET ${Object.keys(stockStatus)
             .filter(key => key !== "itemType")
@@ -162,4 +162,63 @@ export async function updateInventoryStockStatus(itemType,stockStatus){
             }, {}),
         ReturnValues: "NONE"
     }));
+}
+
+export async function getItemsToAddInShoppingList(nextToken = undefined) {
+    const params = {
+        TableName: process.env.SHOPPING_LIST_TABLE,
+        IndexName: 'items_by_dataType',
+        KeyConditionExpression: "#pk = :pkValue",
+        FilterExpression: "#stockStatus IN (:outOfStock, :lowStock)",
+        ExpressionAttributeNames: {
+            "#pk": "dataType",
+            "#stockStatus": "stockStatus"
+        },
+        ExpressionAttributeValues: {
+            ":pkValue": 'inventory',
+            ":outOfStock": "Out of Stock",
+            ":lowStock": "Low Stock"
+        },
+        ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
+    };
+    return await queryCloudData(params);
+}
+
+export async function getCurrentShoppingList(nextToken = undefined) {
+    const params = {
+        TableName: process.env.SHOPPING_LIST_TABLE,
+        IndexName: 'items_by_dataType',
+        KeyConditionExpression: "#pk = :pkValue",
+        ExpressionAttributeNames: {
+            "#pk": "dataType",
+        },
+        ExpressionAttributeValues: {
+            ":pkValue": 'shoppingList',
+        },
+        ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
+    };
+    return await queryCloudData(params);
+}
+
+export async function removeOldShoppingList(currentShoppingList) {
+    try {
+        if (!currentShoppingList || currentShoppingList.length === 0) {
+            console.log("No items to remove from the shopping list.");
+            return;
+        }
+
+        // Call deleteCloudData with the current shopping list
+        await deleteCloudData(process.env.SHOPPING_LIST_TABLE, currentShoppingList, (item, tableName) => ({
+            TableName: tableName,
+            Key: {
+                itemType: item.itemType,
+                dataType: item.dataType 
+            }
+        }));
+
+        console.log(`Removed ${currentShoppingList.length} items from the shopping list.`);
+    } catch (error) {
+        console.error("Error removing items from the shopping list:", error);
+        throw error;
+    }
 }

@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { ScanCommand, DynamoDBDocumentClient, UpdateCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { ScanCommand, DynamoDBDocumentClient, UpdateCommand, QueryCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { config } from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -70,6 +70,23 @@ export async function queryCloudData(params) {
         };
     } catch (error) {
         console.error("Error querying DynamoDB:", error);
+        throw error;
+    }
+}
+
+export async function deleteCloudData(tableName, items, buildParamsFn) {
+    const deletePromises = items.map(item => {
+        const params = buildParamsFn(item, tableName);
+        const command = new DeleteCommand(params);
+        return ddbDocClient.send(command);
+    });
+
+    try {
+        const results = await Promise.all(deletePromises);
+        console.log(`Deleted ${results.length} items successfully.`);
+        return results;
+    } catch (error) {
+        console.error("Error deleting items:", error);
         throw error;
     }
 }

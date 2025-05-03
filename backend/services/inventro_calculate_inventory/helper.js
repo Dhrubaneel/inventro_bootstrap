@@ -1,4 +1,4 @@
-import { getAllTransactionsOfAnItemId, getInventoryByItemType, getConsumtionByItemType } from "./dbHelper.js";
+import { getAllTransactionsOfAnItemId, getInventoryByItemType, getConsumtionByItemType, getCurrentShoppingList, removeOldShoppingList, getItemsToAddInShoppingList } from "./dbHelper.js";
 
 export const getAllActiveTransactions = async (itemId) => {
     try {
@@ -140,4 +140,54 @@ export const calculateCumulativeInventoryStatus = async (itemType, allInventoryS
         locations: calculateItemLocation(locations),
         stockStatus: stockStatus(monthlyConsumption, totalQuantity)
     }
-} 
+}
+
+export const generateShoppingList = async () => {
+    try {
+        const currentShoppingList = [];
+        let nextToken = undefined;
+        do {
+            const response = await getCurrentShoppingList(nextToken);
+            currentShoppingList.push(...response.items);
+            nextToken = response.LastEvaluatedKey ? JSON.stringify(response.LastEvaluatedKey) : undefined;
+        } while (nextToken);
+
+        console.log(`Fetched ${currentShoppingList.length} shopping list items from current shopping list`);
+
+        console.log("Remove old shopping list items ...");
+        await removeOldShoppingList(currentShoppingList);
+
+        const getLowStockItems = [];
+        let nextTokenForStock = undefined;
+
+        do {
+            const response = await getItemsToAddInShoppingList(nextTokenForStock);
+            getLowStockItems.push(...response.items);
+            nextTokenForStock = response.LastEvaluatedKey ? JSON.stringify(response.LastEvaluatedKey) : undefined;
+        } while (nextTokenForStock);
+
+        console.log(`Fetched ${getLowStockItems.length} items to add in shopping list`);
+
+        const newShoppingList = prepareShoppingList(getLowStockItems);
+
+        console.log("New shopping list items: ", JSON.stringify(newShoppingList));
+
+    } catch (e) {
+        console.error("Error generating shopping list: ", e);
+        throw e;
+    }
+}
+
+const prepareShoppingList = (items) => {
+    const shoppingList = items.map(item => {
+        return {
+            itemType: item.itemType,
+            dataType: "shoppingList",
+            quantity: Number(item.monthlyConsumption - item.currentInventory),
+            units: item.units,
+            preferredSupplier:"",
+            preferredBrand:""
+        };
+    });
+    return shoppingList;
+}
