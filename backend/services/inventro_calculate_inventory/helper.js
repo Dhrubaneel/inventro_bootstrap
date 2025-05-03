@@ -40,17 +40,17 @@ export const calculateCurrentInventoryStatus = (allTransactions) => {
         brand: firstAddTransaction.brand,
         quantity: itemQuantity,
         unit: firstAddTransaction.unit,
-        locations: calculateItemCount(locations)
+        locations: calculateItemLocation(locations)
     }
 }
 
-const calculateItemCount = (items) => {
-    const counts = items.reduce((acc, val) => {
+const calculateItemLocation = (items) => {
+    const locations = items.reduce((acc, val) => {
         acc[val] = (acc[val] || 0) + 1;
         return acc;
     }, {});
 
-    return Object.entries(counts)
+    return Object.entries(locations)
         .map(([key, count]) => (count > 1 ? `${key}(${count})` : key))
         .join(', ');
 }
@@ -76,24 +76,38 @@ const calculateMonthlyConsumption = async (itemType) => {
     try {
         const removeTransactions = [];
         let nextToken = undefined;
+
+        // Fetch all remove transactions for the last 6 months
         do {
             const response = await getConsumtionByItemType(itemType, nextToken);
             removeTransactions.push(...response.items);
             nextToken = response.LastEvaluatedKey ? JSON.stringify(response.LastEvaluatedKey) : undefined;
         } while (nextToken);
+
         console.log(`Fetched ${removeTransactions.length} remove transactions for itemType: ${itemType}`);
-        let monthlyConsumption = 0;
-        if (removeTransactions.length > 0) {
-            for (let transaction of removeTransactions) {
-                monthlyConsumption -= transaction.quantityChanged;
-            }
+
+        if (removeTransactions.length === 0) {
+            return 0; // No transactions, monthly consumption is 0
         }
-        return (monthlyConsumption / 6).toFixed(2); // Monthly consumption is calculated based on the last 6 months of transactions
+
+        // Group transactions by month
+        const transactionsByMonth = removeTransactions.reduce((acc, transaction) => {
+            const month = transaction.timestamp.slice(0, 7); // Extract "YYYY-MM" from timestamp
+            acc[month] = (acc[month] || 0) - transaction.quantityChanged; // Sum up consumption for the month
+            return acc;
+        }, {});
+
+        // Calculate total consumption and number of months with transactions
+        const totalConsumption = Object.values(transactionsByMonth).reduce((sum, monthlyTotal) => sum + monthlyTotal, 0);
+        const numberOfMonths = Object.keys(transactionsByMonth).length;
+
+        // Calculate average monthly consumption
+        return Number((totalConsumption / numberOfMonths).toFixed(2));
     } catch (e) {
         console.error("Error fetching consumption details: ", e);
         throw e;
     }
-}
+};
 
 const stockStatus = (monthlyConsumption, currentInventory) => {
     if (currentInventory <= 0) {
@@ -123,7 +137,7 @@ export const calculateCumulativeInventoryStatus = async (itemType, allInventoryS
         monthlyConsumption: monthlyConsumption,
         currentInventory: totalQuantity,
         units: allInventoryStatus[0].unit,
-        locations: calculateItemCount(locations),
+        locations: calculateItemLocation(locations),
         stockStatus: stockStatus(monthlyConsumption, totalQuantity)
     }
 } 

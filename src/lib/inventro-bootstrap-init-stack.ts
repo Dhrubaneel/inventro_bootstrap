@@ -7,7 +7,7 @@ import { Table } from './dynamodb/tables';
 import { ApiGateway } from './apiGateway/api';
 import { LambdaFunction } from './lambda/lambda';
 import { Pipe } from './eventbridge/pipe';
-import { INVENTRO_CONFIG, INVENTRO_INVENTORY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_TRANSACTION_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE, INVENTRO_TRANSACTION, INVENTRO_INVENTORY_ENDPOINT, INVENTRO_INVENTORY_ENDPOINT_PATH_FETCH, INVENTRO_EVENTBRIDGE_PIPE_ROLE, INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE, INVENTRO_CALCULATE_ENDPOINT, INVENTRO_CALCULATE_ENDPOINT_PATH_INVENTORY } from './constants';
+import { INVENTRO_CONFIG, INVENTRO_INVENTORY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_TRANSACTION_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE, INVENTRO_TRANSACTION, INVENTRO_INVENTORY_ENDPOINT, INVENTRO_INVENTORY_ENDPOINT_PATH_FETCH, INVENTRO_EVENTBRIDGE_PIPE_ROLE, INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE, INVENTRO_CALCULATE_ENDPOINT, INVENTRO_CALCULATE_ENDPOINT_PATH_INVENTORY, INVENTRO_SHOPPING_LIST_ENDPOINT } from './constants';
 import { IamRole } from './iam/iam';
 import { ApiResource } from './apiGateway/api-resource';
 import { Function } from 'aws-cdk-lib/aws-lambda';
@@ -106,28 +106,28 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       partitionKey: 'itemType',
       sortKey: 'dataType',
       globalSecondaryIndexes: [
-        {
-          indexName: 'items_by_stock_status',
-          partitionKey: {
-            name: 'stockStatus',
-            type: dynamodb.AttributeType.STRING
-          },
-          sortKey: {
-            name: 'itemType',
-            type: dynamodb.AttributeType.STRING
-          }
-        },
-        {
-          indexName: 'items_by_transaction_type',
-          partitionKey: {
-            name: 'inShoppingList',
-            type: dynamodb.AttributeType.STRING
-          },
-          sortKey: {
-            name: 'itemType',
-            type: dynamodb.AttributeType.STRING
-          }
-        }
+        // {
+        //   indexName: 'items_by_stock_status',
+        //   partitionKey: {
+        //     name: 'stockStatus',
+        //     type: dynamodb.AttributeType.STRING
+        //   },
+        //   sortKey: {
+        //     name: 'itemType',
+        //     type: dynamodb.AttributeType.STRING
+        //   }
+        // },
+        // {
+        //   indexName: 'items_by_transaction_type',
+        //   partitionKey: {
+        //     name: 'inShoppingList',
+        //     type: dynamodb.AttributeType.STRING
+        //   },
+        //   sortKey: {
+        //     name: 'itemType',
+        //     type: dynamodb.AttributeType.STRING
+        //   }
+        // }
       ]
     });
 
@@ -258,6 +258,19 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       methodResponses: getDefaultMethodResponses()
     });
 
+    const inventro_shopping_list_api_resource = inventro_api.restApi.root.addResource(INVENTRO_SHOPPING_LIST_ENDPOINT);
+
+    const inventro_shopping_list_api_resource_sync_method = new ApiResource(this, 'InventroShoppingListApiResourceSyncMethod', {
+      restApi: inventro_api.restApi,
+      parentResource: inventro_shopping_list_api_resource,
+      resourcePath: INVENTRO_CONFIG_ENDPOINT_PATH_SYNC,
+      lambdaFunction: inventro_service.function,
+      httpMethod: 'POST',
+      requestTemplate: generateRequestTemplate('syncInventryList'),
+      integrationResponses: getDefaultIntegrationResponses(),
+      methodResponses: getDefaultMethodResponses()
+    });
+
     const inventro_transaction_pipe = new Pipe(this, 'InventroTransactionPipe', {
       pipeName: INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE,
       sourceStreamArn: transaction_table.table.tableStreamArn!,
@@ -285,7 +298,9 @@ export class InventroBootstrapInitStack extends cdk.Stack {
         inventro_inventory_api_resource_fetch_method,
         inventro_transaction_pipe,
         inventro_calculate_api_resource,
-        inventro_calculate_api_resource_inventory_method
+        inventro_calculate_api_resource_inventory_method,
+        inventro_shopping_list_api_resource,
+        inventro_shopping_list_api_resource_sync_method
       ],
       { 'Project': 'Inventro' }
     );

@@ -30,7 +30,7 @@ export async function getAllTransactionsOfAnItemId(pkValue, nextToken = undefine
     return result;
 }
 
-export async function getInventoryByItemType(itemType, nextToken = undefined)  {
+export async function getInventoryByItemType(itemType, nextToken = undefined) {
     const params = {
         TableName: process.env.INVENTORY_TABLE,
         IndexName: 'items_by_type',
@@ -110,10 +110,10 @@ export async function updateTTLForOldTransaction(allTransactions) {
 }
 
 export async function getConsumtionByItemType(itemType, nextToken = undefined) {
-    // Calculate the timestamp for 1 week ago
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // Subtract 7 days
-    const oneWeekAgoISO = oneWeekAgo.toISOString(); // Convert to ISO string format
+    // Calculate the timestamp for 6 months ago
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6); // Subtract 6 months
+    const sixMonthsAgoISO = sixMonthsAgo.toISOString(); // Convert to ISO string format
 
     const params = {
         TableName: process.env.TRANSACTION_TABLE,
@@ -128,11 +128,38 @@ export async function getConsumtionByItemType(itemType, nextToken = undefined) {
         ExpressionAttributeValues: {
             ":pkValue": 'remove',
             ":skValue": itemType,
-            ":oneWeekAgo": oneWeekAgoISO
+            ":oneWeekAgo": sixMonthsAgoISO
         },
         ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
     };
 
     const result = await queryCloudData(params);
     return result;
+}
+
+export async function updateInventoryStockStatus(itemType,stockStatus){
+    return await updateItems(process.env.SHOPPING_LIST_TABLE, [stockStatus], (item, tableName) => ({
+        TableName: tableName,
+        Key: {
+            itemType : itemType,
+            dataType : "inventory"
+        },
+        UpdateExpression: `SET ${Object.keys(stockStatus)
+            .filter(key => key !== "itemType")
+            .map(key => `#${key} = :${key}`)
+            .join(", ")}`,
+        ExpressionAttributeNames: Object.keys(stockStatus)
+            .filter(key => key !== "itemType")
+            .reduce((acc, key) => {
+                acc[`#${key}`] = key;
+                return acc;
+            }, {}),
+        ExpressionAttributeValues: Object.keys(stockStatus)
+            .filter(key => key !== "itemType")
+            .reduce((acc, key) => {
+                acc[`:${key}`] = stockStatus[key];
+                return acc;
+            }, {}),
+        ReturnValues: "NONE"
+    }));
 }
