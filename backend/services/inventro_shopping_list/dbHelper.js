@@ -7,13 +7,13 @@ const __dirname = path.dirname(__filename);
 const envPath = path.resolve(__dirname, '../../.env');
 config({ path: envPath });
 
-export async function syncCloudShoppingList(nextToken = undefined) {
+export async function syncCloudShoppingList(dataType, nextToken = undefined) {
     const params = {
         TableName: process.env.SHOPPING_LIST_TABLE,
         IndexName: 'items_by_dataType',
         KeyConditionExpression: "#pk = :pkValue",
         ExpressionAttributeNames: {
-            "#pk": "dataType",
+            "#pk": dataType,
         },
         ExpressionAttributeValues: {
             ":pkValue": 'inventory',
