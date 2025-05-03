@@ -1,5 +1,4 @@
 import { queryCloudData, updateItems } from "../../dynamodb.js";
-import { v4 as uuidv4 } from 'uuid';
 import { config } from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
