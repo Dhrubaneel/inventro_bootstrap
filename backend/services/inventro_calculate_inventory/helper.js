@@ -1,4 +1,4 @@
-import { getAllTransactionsOfAnItemId } from "./dbHelper.js";
+import { getAllTransactionsOfAnItemId, getInventoryByItemType, getConsumtionByItemType } from "./dbHelper.js";
 
 export const getAllActiveTransactions = async (itemId) => {
     try {
@@ -27,7 +27,7 @@ export const calculateCurrentInventoryStatus = (allTransactions) => {
             locations.push(transaction.location);
         } else if (transaction.transactionType === "remove" && !transaction.partialTransaction) {
             locations.splice(locations.indexOf(locations.find(item => item === transaction.location)), 1);
-        } 
+        }
     }
     if (itemQuantity === 0) {
         locations.length = 0;
@@ -54,3 +54,76 @@ const calculateItemCount = (items) => {
         .map(([key, count]) => (count > 1 ? `${key}(${count})` : key))
         .join(', ');
 }
+
+export const getInventoryStatusByItemType = async (itemType) => {
+    try {
+        const allInventoryStatus = [];
+        let nextToken = undefined;
+        do {
+            const response = await getInventoryByItemType(itemType, nextToken);
+            allInventoryStatus.push(...response.items);
+            nextToken = response.LastEvaluatedKey ? JSON.stringify(response.LastEvaluatedKey) : undefined;
+        } while (nextToken);
+        console.log(`Fetched ${allInventoryStatus.length} inventory status for itemType: ${itemType}`);
+        return allInventoryStatus;
+    } catch (e) {
+        console.error("Error fetching inventory status: ", e);
+        throw e;
+    }
+}
+
+const calculateMonthlyConsumption = async (itemType) => {
+    try {
+        const removeTransactions = [];
+        let nextToken = undefined;
+        do {
+            const response = await getConsumtionByItemType(itemType, nextToken);
+            removeTransactions.push(...response.items);
+            nextToken = response.LastEvaluatedKey ? JSON.stringify(response.LastEvaluatedKey) : undefined;
+        } while (nextToken);
+        console.log(`Fetched ${removeTransactions.length} remove transactions for itemType: ${itemType}`);
+        let monthlyConsumption = 0;
+        if (removeTransactions.length > 0) {
+            for (let transaction of removeTransactions) {
+                monthlyConsumption -= transaction.quantityChanged;
+            }
+        }
+        return (monthlyConsumption / 6).toFixed(2); // Monthly consumption is calculated based on the last 6 months of transactions
+    } catch (e) {
+        console.error("Error fetching consumption details: ", e);
+        throw e;
+    }
+}
+
+const stockStatus = (monthlyConsumption, currentInventory) => {
+    if (currentInventory <= 0) {
+        return "Out of Stock";
+    } else if (currentInventory < monthlyConsumption) {
+        return "Low Stock";
+    } else {
+        return "Sufficient";
+    }
+};
+
+export const calculateCumulativeInventoryStatus = async (itemType, allInventoryStatus) => {
+    let totalQuantity = 0;
+    const locations = [];
+    for (let inventoryStatus of allInventoryStatus) {
+        totalQuantity += inventoryStatus.quantity;
+        if (inventoryStatus.locations) {
+            locations.push(...inventoryStatus.locations.split(", "));
+        }
+    }
+    if (totalQuantity === 0) {
+        locations.length = 0;
+    }
+    const monthlyConsumption = await calculateMonthlyConsumption(itemType);
+    return {
+        itemType: itemType,
+        monthlyConsumption: monthlyConsumption,
+        currentInventory: totalQuantity,
+        units: allInventoryStatus[0].unit,
+        locations: calculateItemCount(locations),
+        stockStatus: stockStatus(monthlyConsumption, totalQuantity)
+    }
+} 

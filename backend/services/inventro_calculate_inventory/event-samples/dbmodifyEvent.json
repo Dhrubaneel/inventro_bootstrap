@@ -1,9 +1,0 @@
-{
-    "action": "calculateInventory",
-    "data": {
-        "eventName": "MODIFY",
-        "transactionId": "eaad1e91-03c1-409f-ab54-230c330e0577",
-        "itemId": "8909106022089",
-        "transactionType": "remove"
-    }
-}

@@ -4,6 +4,7 @@
         "eventName": "INSERT",
         "transactionId": "735a9629-e126-4249-a0e7-6a6d76505862",
         "itemId": "8909106022089",
-        "transactionType": "add"
+        "transactionType": "add",
+        "itemType": "Fabric Softeners"
     }
 }

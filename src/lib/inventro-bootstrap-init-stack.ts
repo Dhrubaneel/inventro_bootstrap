@@ -79,13 +79,13 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       sortKey: 'itemId',
       globalSecondaryIndexes: [
         {
-          indexName: 'items_by_transaction_type',
+          indexName: 'itemType_by_transaction_type',
           partitionKey: {
             name: 'transactionType',
             type: dynamodb.AttributeType.STRING
           },
           sortKey: {
-            name: 'itemId',
+            name: 'type',
             type: dynamodb.AttributeType.STRING
           }
         },
@@ -248,7 +248,8 @@ export class InventroBootstrapInitStack extends cdk.Stack {
               "eventName": "$inputRoot.eventName",
               "transactionId": "$inputRoot.dynamodb.NewImage.transactionId.S",
               "itemId": "$inputRoot.dynamodb.NewImage.itemId.S",
-              "transactionType": "$inputRoot.dynamodb.NewImage.transactionType.S"
+              "transactionType": "$inputRoot.dynamodb.NewImage.transactionType.S",
+              "itemType": "$inputRoot.dynamodb.NewImage.type.S"
             }
           }
         `

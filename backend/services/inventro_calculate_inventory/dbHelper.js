@@ -10,7 +10,7 @@ config({ path: envPath });
 export async function getAllTransactionsOfAnItemId(pkValue, nextToken = undefined) {
     const params = {
         TableName: process.env.TRANSACTION_TABLE,
-        IndexName: 'transaction_by_itemId', 
+        IndexName: 'transaction_by_itemId',
         KeyConditionExpression: "#pk = :pkValue",
         FilterExpression: "attribute_not_exists(#expiredBy)",
         ExpressionAttributeNames: {
@@ -18,7 +18,7 @@ export async function getAllTransactionsOfAnItemId(pkValue, nextToken = undefine
             "#expiredBy": "expiredBy"
         },
         ExpressionAttributeValues: {
-            ":pkValue": pkValue, 
+            ":pkValue": pkValue,
         },
         ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
     };
@@ -27,6 +27,24 @@ export async function getAllTransactionsOfAnItemId(pkValue, nextToken = undefine
 
     result.items.sort((a, b) => a.transactionType.localeCompare(b.transactionType));
 
+    return result;
+}
+
+export async function getInventoryByItemType(itemType, nextToken = undefined)  {
+    const params = {
+        TableName: process.env.INVENTORY_TABLE,
+        IndexName: 'items_by_type',
+        KeyConditionExpression: "#pk = :pkValue",
+        ExpressionAttributeNames: {
+            "#pk": "type"
+        },
+        ExpressionAttributeValues: {
+            ":pkValue": itemType,
+        },
+        ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
+    };
+
+    const result = await queryCloudData(params);
     return result;
 }
 
@@ -89,4 +107,32 @@ export async function updateTTLForOldTransaction(allTransactions) {
         console.error("Error updating TTL for transactions:", error);
         throw error;
     }
+}
+
+export async function getConsumtionByItemType(itemType, nextToken = undefined) {
+    // Calculate the timestamp for 1 week ago
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // Subtract 7 days
+    const oneWeekAgoISO = oneWeekAgo.toISOString(); // Convert to ISO string format
+
+    const params = {
+        TableName: process.env.TRANSACTION_TABLE,
+        IndexName: 'itemType_by_transaction_type',
+        KeyConditionExpression: "#pk = :pkValue AND #sk = :skValue",
+        FilterExpression: "#timestamp >= :oneWeekAgo",
+        ExpressionAttributeNames: {
+            "#pk": "transactionType",
+            "#sk": "itemType",
+            "#timestamp": "timestamp"
+        },
+        ExpressionAttributeValues: {
+            ":pkValue": 'remove',
+            ":skValue": itemType,
+            ":oneWeekAgo": oneWeekAgoISO
+        },
+        ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined
+    };
+
+    const result = await queryCloudData(params);
+    return result;
 }
