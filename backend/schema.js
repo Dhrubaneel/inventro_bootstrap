@@ -72,3 +72,15 @@ export const addCustomShoppingItemSchema = {
         required: ["customItemType", "preferredItemName", "quantity"]
     }
 }
+
+export const removeCustomShoppingItemSchema = {
+    id: "/RemoveCustomShoppingItem",
+    type: "array",
+    items: {
+        type: "object",
+        properties: {
+            itemType: { type: "string" }
+        },
+        required: ["itemType"]
+    }
+}

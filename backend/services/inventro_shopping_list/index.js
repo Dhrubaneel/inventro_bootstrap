@@ -1,6 +1,6 @@
-import { syncCloudShoppingList, addCustomShoppingListItem } from './dbHelper.js';
+import { syncCloudShoppingList, addCustomShoppingListItem, removeCustomShoppingListItem } from './dbHelper.js';
 import { Validator } from "jsonschema";
-import { fetchInventorySchema, addCustomShoppingItemSchema } from "../../schema.js";
+import { fetchInventorySchema, addCustomShoppingItemSchema, removeCustomShoppingItemSchema } from "../../schema.js";
 
 export const syncInventoryList = async (event) => {
     try {
@@ -56,3 +56,19 @@ export const addCustomShoppingItem = async (event) => {
     }
 }
 
+export const removeCustomShoppingItem = async (event) => {
+    try { 
+        console.log("Input Event for removeCustomShoppingItem: ", JSON.stringify(event));
+        // Validate the event against the schema
+        const validationResult = new Validator().validate(event, removeCustomShoppingItemSchema);
+        if (!validationResult.valid) {
+            console.error("Validation errors:", validationResult.errors);
+            throw new Error(validationResult.errors);
+        }
+        return await removeCustomShoppingListItem(event);
+    }
+    catch (e) {
+        console.error("Error: ", e);
+        throw e;
+    }
+}

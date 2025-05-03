@@ -1,0 +1,8 @@
+{
+    "action": "removeCustomShoppingItems",
+    "data": [
+        {
+            "itemType": "custom-1234"
+        }
+    ]
+}

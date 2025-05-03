@@ -3,7 +3,7 @@ import { syncConfig, upsertConfig } from './services/inventro_config/index.js';
 import { updateTransaction } from './services/inventro_transaction/index.js';
 import { fetchInventory } from './services/inventro_inventory/index.js';
 import { calculateInventory } from './services/inventro_calculate_inventory/index.js';
-import { syncShoppingList, syncInventoryList, addCustomShoppingItem } from './services/inventro_shopping_list/index.js';
+import { syncShoppingList, syncInventoryList, addCustomShoppingItem, removeCustomShoppingItem } from './services/inventro_shopping_list/index.js';
 
 const objFramework = new LambdaFramework();
 
@@ -15,6 +15,7 @@ objFramework.subscribeHandler('calculateInventory', calculateInventory);
 objFramework.subscribeHandler('syncInventoryList', syncInventoryList);
 objFramework.subscribeHandler('syncShoppingList', syncShoppingList);
 objFramework.subscribeHandler('addCustomShoppingItems', addCustomShoppingItem);
+objFramework.subscribeHandler('removeCustomShoppingItems', removeCustomShoppingItem);
 
 const handler = objFramework.invoke.bind(objFramework);
 
