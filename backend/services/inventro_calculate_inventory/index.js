@@ -14,7 +14,7 @@ export const calculateInventory = async (event) => {
             }
             const currentInventoryStatus = calculateCurrentInventoryStatus(allTransactions);
             console.log(`Current Inventory Status for : ${event.itemId}`, JSON.stringify(currentInventoryStatus));
-            updateItemInventoryStatus(event.itemId, currentInventoryStatus);
+            await updateItemInventoryStatus(event.itemId, currentInventoryStatus);
             if (currentInventoryStatus.quantity <= 0) {
                 console.log(`Item ${event.itemId} is out of stock`);
                 await updateTTLForOldTransaction(allTransactions);
