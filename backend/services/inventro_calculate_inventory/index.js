@@ -23,7 +23,7 @@ export const calculateInventory = async (event) => {
             }
             const currentCumulativeItemStatusInInventory = await calculateCumulativeInventoryStatus(event.itemType, currentInventoryByItemType);
             console.log(`Current Cumulative Inventory Status for itemType: ${event.itemType}`, JSON.stringify(currentCumulativeItemStatusInInventory));
-            await updateInventoryStockStatus(event.itemType,"inventory", currentCumulativeItemStatusInInventory);
+            await updateShopingListTable(event.itemType,"inventory", currentCumulativeItemStatusInInventory);
             console.log("Generate updated shopping list ...");
             const newShoppingList = await generateShoppingList();
             for(let item of newShoppingList) {
