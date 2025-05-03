@@ -7,7 +7,7 @@ import { Table } from './dynamodb/tables';
 import { ApiGateway } from './apiGateway/api';
 import { LambdaFunction } from './lambda/lambda';
 import { Pipe } from './eventbridge/pipe';
-import { INVENTRO_CONFIG, INVENTRO_INVENTORY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_TRANSACTION_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE, INVENTRO_TRANSACTION, INVENTRO_INVENTORY_ENDPOINT, INVENTRO_INVENTORY_ENDPOINT_PATH_FETCH, INVENTRO_EVENTBRIDGE_PIPE_ROLE, INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE, INVENTRO_CALCULATE_ENDPOINT, INVENTRO_CALCULATE_ENDPOINT_PATH_INVENTORY, INVENTRO_SHOPPING_LIST_ENDPOINT, INVENTRO_SHOPPING_LIST_ENDPOINT_PATH_INVENTORY_LIST, INVENTRO_SHOPPING_LIST_ENDPOINT_PATH_GET_LIST } from './constants';
+import { INVENTRO_CONFIG, INVENTRO_INVENTORY, INVENTRO_SHOPPING_LIST, INVENTRO_API, INVENTRO_SERVICE, INVENTRO_SERVICE_TIMEOUT, INVENTRO_SERVICE_ROLE, INVENTRO_CONFIG_ENDPOINT, INVENTRO_TRANSACTION_ENDPOINT, INVENTRO_CONFIG_ENDPOINT_PATH_SYNC, INVENTRO_CONFIG_ENDPOINT_PATH_UPSERT, INVENTRO_TRANSACTION_ENDPOINT_PATH_UPDATE, INVENTRO_TRANSACTION, INVENTRO_INVENTORY_ENDPOINT, INVENTRO_INVENTORY_ENDPOINT_PATH_FETCH, INVENTRO_EVENTBRIDGE_PIPE_ROLE, INVENTRO_EVENTBRIDGE_TRANSACTION_TABLE_PIPE, INVENTRO_CALCULATE_ENDPOINT, INVENTRO_CALCULATE_ENDPOINT_PATH_INVENTORY, INVENTRO_SHOPPING_LIST_ENDPOINT, INVENTRO_SHOPPING_LIST_ENDPOINT_PATH_INVENTORY_LIST, INVENTRO_SHOPPING_LIST_ENDPOINT_PATH_GET_LIST, INVENTRO_SHOPPING_LIST_ENDPOINT_PATH_ADD } from './constants';
 import { IamRole } from './iam/iam';
 import { ApiResource } from './apiGateway/api-resource';
 
@@ -255,6 +255,17 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       methodResponses: getDefaultMethodResponses()
     });
 
+    const inventro_shopping_list_api_resource_add_method = new ApiResource(this, 'InventroShoppingListApiResourceAddMethod', {
+      restApi: inventro_api.restApi,
+      parentResource: inventro_shopping_list_api_resource,
+      resourcePath: INVENTRO_SHOPPING_LIST_ENDPOINT_PATH_ADD,
+      lambdaFunction: inventro_service.function,
+      httpMethod: 'POST',
+      requestTemplate: generateRequestTemplate('addCustomShoppingItems'),
+      integrationResponses: getDefaultIntegrationResponses(),
+      methodResponses: getDefaultMethodResponses()
+    });
+
     const inventro_shopping_list_api_resource_get_list_method = new ApiResource(this, 'InventroShoppingListApiResourceGetMethod', {
       restApi: inventro_api.restApi,
       parentResource: inventro_shopping_list_api_resource,
@@ -296,7 +307,8 @@ export class InventroBootstrapInitStack extends cdk.Stack {
         inventro_calculate_api_resource_inventory_method,
         inventro_shopping_list_api_resource,
         inventro_shopping_list_api_resource_sync_method,
-        inventro_shopping_list_api_resource_get_list_method
+        inventro_shopping_list_api_resource_get_list_method,
+        inventro_shopping_list_api_resource_add_method
       ],
       { 'Project': 'Inventro' }
     );
