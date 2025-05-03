@@ -1,4 +1,4 @@
-import { queryCloudData, updateItems } from "../../dynamodb.js";
+import { queryCloudData, updateItems, deleteCloudData } from "../../dynamodb.js";
 import { config } from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
