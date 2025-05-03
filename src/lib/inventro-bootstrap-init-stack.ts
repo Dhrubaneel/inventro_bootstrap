@@ -78,17 +78,17 @@ export class InventroBootstrapInitStack extends cdk.Stack {
       partitionKey: 'transactionId',
       sortKey: 'itemId',
       globalSecondaryIndexes: [
-        {
-          indexName: 'itemType_by_transaction_type',
-          partitionKey: {
-            name: 'transactionType',
-            type: dynamodb.AttributeType.STRING
-          },
-          sortKey: {
-            name: 'type',
-            type: dynamodb.AttributeType.STRING
-          }
-        },
+        // {
+        //   indexName: 'itemType_by_transaction_type',
+        //   partitionKey: {
+        //     name: 'transactionType',
+        //     type: dynamodb.AttributeType.STRING
+        //   },
+        //   sortKey: {
+        //     name: 'type',
+        //     type: dynamodb.AttributeType.STRING
+        //   }
+        // },
         {
           indexName: 'transaction_by_itemId',
           partitionKey: {

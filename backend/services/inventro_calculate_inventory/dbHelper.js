@@ -122,7 +122,7 @@ export async function getConsumtionByItemType(itemType, nextToken = undefined) {
         FilterExpression: "#timestamp >= :oneWeekAgo",
         ExpressionAttributeNames: {
             "#pk": "transactionType",
-            "#sk": "itemType",
+            "#sk": "type",
             "#timestamp": "timestamp"
         },
         ExpressionAttributeValues: {
